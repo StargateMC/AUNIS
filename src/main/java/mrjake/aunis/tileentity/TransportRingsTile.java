@@ -330,7 +330,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// ---------------------------------------------------------------------------------
 	// Rings network
 	private TransportRings rings;
-	private TransportRings getRings() {
+	public TransportRings getRings() {
 		if (rings == null)
 			rings = new TransportRings(pos);
 		
