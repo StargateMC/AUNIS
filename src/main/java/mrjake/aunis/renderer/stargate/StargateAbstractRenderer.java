@@ -1,171 +1,114 @@
 package mrjake.aunis.renderer.stargate;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
+
 import mrjake.aunis.Aunis;
-import mrjake.aunis.OBJLoader.ModelLoader;
+import mrjake.aunis.AunisProps;
 import mrjake.aunis.config.AunisConfig;
+import mrjake.aunis.loader.texture.Texture;
+import mrjake.aunis.loader.texture.TextureLoader;
+import mrjake.aunis.renderer.BlockRenderer;
 import mrjake.aunis.renderer.stargate.StargateRendererStatic.QuadStrip;
-import mrjake.aunis.sound.AunisSoundHelper;
-import mrjake.aunis.sound.EnumAunisPositionedSound;
-import mrjake.aunis.state.StargateRendererStateBase;
-import mrjake.aunis.tesr.RendererInterface;
+import mrjake.aunis.stargate.merging.StargateAbstractMergeHelper;
+import mrjake.aunis.tileentity.stargate.StargateAbstractBaseTile;
 import mrjake.aunis.util.AunisAxisAlignedBB;
+import mrjake.aunis.util.FacingToRotation;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
-public abstract class StargateAbstractRenderer implements RendererInterface {
-	
-	protected World world;
-	protected BlockPos pos;	
-	protected EnumFacing facing = EnumFacing.NORTH;
-	protected int horizontalRotation = 0;
-	
-	private AunisAxisAlignedBB eventHorizonBox;
-	private List<AunisAxisAlignedBB> localKillingBoxes;
-	private List<AunisAxisAlignedBB> localInnerBlockBoxes;
-	
-	public StargateAbstractRenderer(World world, BlockPos pos) {
-		this.world = world;
-		this.pos = pos;
-	}
-	
-	public void update(EnumFacing facing, AunisAxisAlignedBB eventHorizonBox, List<AunisAxisAlignedBB> localKillingBoxes, List<AunisAxisAlignedBB> localInnerBlockBoxes) {
-		if (facing.getAxis() == EnumFacing.Axis.X)
-			facing = facing.getOpposite();
-		
-		this.facing = facing;
-		this.horizontalRotation = (int) this.facing.getHorizontalAngle();
-		
-		this.eventHorizonBox = eventHorizonBox;
-		this.localKillingBoxes = localKillingBoxes;
-		this.localInnerBlockBoxes = localInnerBlockBoxes;
-	}
-	
-	public int getHorizontalRotation() {
-		return horizontalRotation;
-	}
+public abstract class StargateAbstractRenderer<S extends StargateAbstractRendererState> extends TileEntitySpecialRenderer<StargateAbstractBaseTile> {
 	
 	// ---------------------------------------------------------------------------------------
 	// Render
 	
 	@Override
-	public void render(double x, double y, double z, float partialTicks) {
+	public void render(StargateAbstractBaseTile te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+		@SuppressWarnings("unchecked")
+		S rendererState = (S) te.getRendererStateClient();
 		
-		if (shouldRender()) {	
+		if (rendererState != null) {		
 			GlStateManager.pushMatrix();
 			GlStateManager.translate(x, y, z);
 			
-			if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
-				eventHorizonBox.render(x, y, z);
-				
-				int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? localKillingBoxes.size() : rendererState.horizonSegments;
-
-				for (int i=0; i<segments; i++) {
-					localKillingBoxes.get(i).render(x, y, z);
-				}
-							
-				for (AunisAxisAlignedBB b : localInnerBlockBoxes)
-					b.render(x, y, z);
-			}
+			if (shouldRender(rendererState)) {				
+				if (AunisConfig.debugConfig.renderBoundingBoxes || AunisConfig.debugConfig.renderWholeKawooshBoundingBox) {
+					te.getEventHorizonLocalBox().render();
 					
-			Vec3d vec = getRenderTranslation();
-			GlStateManager.translate(vec.x, vec.y, vec.z);			
-			GlStateManager.scale(getRenderScale(), getRenderScale(), getRenderScale());
+					int segments = AunisConfig.debugConfig.renderWholeKawooshBoundingBox ? te.getLocalKillingBoxes().size() : rendererState.horizonSegments;
+	
+					for (int i=0; i<segments; i++) {
+						te.getLocalKillingBoxes().get(i).render();
+					}
+								
+					for (AunisAxisAlignedBB b : te.getLocalInnerBlockBoxes())
+						b.render();
+					
+					te.getRenderBoundingBoxForDisplay().render();
+				}
+								
+	            applyTransformations(rendererState);
+	            GlStateManager.disableRescaleNormal();
+				applyLightMap(rendererState, partialTicks);
+				
+				renderGate(rendererState, partialTicks);
+				
+				if (rendererState.doEventHorizonRender)
+					renderKawoosh(rendererState, partialTicks);
+			}
 			
-			applyLightMap(partialTicks);
-//			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
+			else {
+				bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				
+				GlStateManager.enableBlend();
+	            GlStateManager.blendFunc(GL11.GL_CONSTANT_ALPHA, GL11.GL_ONE_MINUS_CONSTANT_ALPHA);
+	            GL14.glBlendColor(0, 0, 0, 0.7f);
+				
+				Minecraft.getMinecraft().entityRenderer.disableLightmap();
+				
+				for (Map.Entry<BlockPos, IBlockState> entry : getMemberBlockStates(te.getMergeHelper(), rendererState.facing).entrySet()) {				
+					BlockPos pos = entry.getKey().rotate(FacingToRotation.get(rendererState.facing));
+					
+					if (getWorld().isAirBlock(pos.add(rendererState.pos)))
+						BlockRenderer.render(getWorld(), pos, entry.getValue());
+				}
+				
+				Minecraft.getMinecraft().entityRenderer.enableLightmap();
+				GlStateManager.disableBlend();
+			}
 			
-			renderRing(partialTicks);
-			
-			GlStateManager.rotate(horizontalRotation, 0, 1, 0);
-			
-			renderGate();
-			renderChevrons(partialTicks);
-			
-			if (rendererState.doEventHorizonRender)
-				renderKawoosh(partialTicks);
-			
-			GlStateManager.popMatrix();
+			GlStateManager.popMatrix();	
 		}
 	}
 	
-	protected StargateRendererStateBase rendererState;
-	
-	public void setRendererState(StargateRendererStateBase state) {
-		this.rendererState = state;
+	protected boolean shouldRender(S rendererState) {
+		IBlockState state = getWorld().getBlockState(rendererState.pos);
+		return state.getPropertyKeys().contains(AunisProps.RENDER_BLOCK) && !state.getValue(AunisProps.RENDER_BLOCK);
 	}
 	
-	public boolean isDialingComplete() {
-		return rendererState.dialingComplete;
-	}
-	
-	protected abstract boolean shouldRender();
-	protected abstract void applyLightMap(double partialTicks);
-	protected abstract double getRenderScale();
-	protected abstract Vec3d getRenderTranslation();
-	
-	protected abstract void renderGate();
-	protected abstract void renderRing(double partialTicks);
-	protected abstract void renderChevrons(double partialTicks);
-	public abstract void clearChevrons(Long stateChange);
-	
-	
-	private long kawooshStart;
-	private float vortexStart;
-	
-	private final float speedFactor = 6f;
-	
-	private QuadStrip backStrip;
-	private boolean backStripClamp;
-	
-	private Float whiteOverlayAlpha;
-	
-	private float gateWaitStart = 0;
-	
-	private long gateWaitClose = 0;
-	private boolean zeroAlphaSet;	
-	
-	private boolean horizonUnstable = false;
-	
-	public void setHorizonUnstable(boolean horizonUnstable) {
-		this.horizonUnstable = horizonUnstable;
-	}
-	
-	public void openGate() {
-		Aunis.info("openGate");
+	/**
+	 * @param mergeHelper Merge helper instance.
+	 * @return {@link Map} of {@link BlockPos} to {@link IBlockState} for rendering of the ghost blocks.
+	 */
+	protected abstract Map<BlockPos, IBlockState> getMemberBlockStates(StargateAbstractMergeHelper mergeHelper, EnumFacing facing);
 		
-		gateWaitStart = world.getTotalWorldTime();
-		
-		zeroAlphaSet = false;
-		backStripClamp = true;
-		whiteOverlayAlpha = 1.0f;
-		
-		rendererState.vortexState = EnumVortexState.FORMING;
-		
-		kawooshStart = world.getTotalWorldTime();
-		rendererState.doEventHorizonRender = true;
-	}
+	protected abstract void applyLightMap(S rendererState, double partialTicks);
+	protected abstract void applyTransformations(S rendererState);
+	protected abstract void renderGate(S rendererState, double partialTicks);
 	
-	public void closeGate() {
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, false);
-		
-		gateWaitClose = world.getTotalWorldTime();
-		
-		rendererState.vortexState = EnumVortexState.CLOSING;
-	}
-	
-	private void engageGate() {
-		rendererState.vortexState = EnumVortexState.STILL;
-		AunisSoundHelper.playPositionedSoundClientSide(EnumAunisPositionedSound.WORMHOLE, pos, true);
-	}
+	private static final float VORTEX_START = 5.275f;
+	private static final float SPEED_FACTOR = 6f;
 	
 	public enum EnumVortexState {
 		FORMING(0),
@@ -197,27 +140,42 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 		}
 	}
 	
-	protected void renderKawoosh(double partialTicks) {
+	protected static final ResourceLocation EV_HORIZON_NORMAL_TEXTURE_ANIMATED = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_animated.jpg");
+	protected static final ResourceLocation EV_HORIZON_DESATURATED_TEXTURE_ANIMATED = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_animated.jpg_desaturated");
+	
+	protected static final ResourceLocation EV_HORIZON_NORMAL_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon.jpg");
+	protected static final ResourceLocation EV_HORIZON_DESATURATED_TEXTURE = new ResourceLocation(Aunis.ModID, "textures/tesr/event_horizon_unstable.jpg");
+	
+	protected ResourceLocation getEventHorizonTextureResource(StargateAbstractRendererState rendererState) {
+		if (AunisConfig.stargateConfig.disableAnimatedEventHorizon)
+			return rendererState.horizonUnstable ? EV_HORIZON_DESATURATED_TEXTURE : EV_HORIZON_NORMAL_TEXTURE;
+		
+		return rendererState.horizonUnstable ? EV_HORIZON_DESATURATED_TEXTURE_ANIMATED : EV_HORIZON_NORMAL_TEXTURE_ANIMATED;
+	}
+	
+	protected void renderKawoosh(StargateAbstractRendererState rendererState, double partialTicks) {
 //		rendererState.vortexState = EnumVortexState.FULL;
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 15 * 16, 15 * 16);
 		
-		float gateWait = world.getTotalWorldTime() - gateWaitStart;
+		float gateWait = getWorld().getTotalWorldTime() - rendererState.gateWaitStart;
 		
 		// Waiting for sound sync
 		if ( gateWait < 44 ) {
 			return;
 		}
 		
-		kawooshStart = (long) (gateWaitStart + 44);
-		
 		GlStateManager.disableLighting();
+        GlStateManager.enableCull();
 		
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(0, 0, 0.1);
 		
-		ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2.jpg"));
+		Texture ehTexture = TextureLoader.getTexture(getEventHorizonTextureResource(rendererState));
+		if (ehTexture != null)
+			ehTexture.bindTexture();
 		
-		float tick = (float) (world.getTotalWorldTime() - kawooshStart + partialTicks);
+		long kawooshStart = rendererState.gateWaitStart + 44;
+		float tick = (float) (getWorld().getTotalWorldTime() - kawooshStart + partialTicks);
 		float mul = 1;
 		
 		float inner = StargateRendererStatic.eventHorizonRadius - tick/3.957f;
@@ -225,29 +183,27 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 		// Fading in the unstable vortex
 		float tick2 = tick/4f;
 		if ( tick2 <= Math.PI/2 )
-			whiteOverlayAlpha = MathHelper.cos( tick2 );
+			rendererState.whiteOverlayAlpha = MathHelper.cos( tick2 );
 		
 		else {
-			if (!zeroAlphaSet) {
-				zeroAlphaSet = true;
-				whiteOverlayAlpha = 0.0f;
+			if (!rendererState.zeroAlphaSet) {
+				rendererState.zeroAlphaSet = true;
+				rendererState.whiteOverlayAlpha = 0.0f;
 			}
 		}
 		
 		// Going center
 		if (inner >= StargateRendererStatic.kawooshRadius) {
-			backStrip = new QuadStrip(8, inner - 0.2f, StargateRendererStatic.eventHorizonRadius, tick);
+			rendererState.backStrip = new QuadStrip(8, inner - 0.2f, StargateRendererStatic.eventHorizonRadius, tick);
 		}
 		
 		else {
-			if (backStripClamp) {
+			if (rendererState.backStripClamp) {
 				// Clamping to the desired size
-				backStripClamp = false;
-				backStrip = new QuadStrip(8, StargateRendererStatic.kawooshRadius - 0.2f, StargateRendererStatic.eventHorizonRadius, null);
+				rendererState.backStripClamp = false;
+				rendererState.backStrip = new QuadStrip(8, StargateRendererStatic.kawooshRadius - 0.2f, StargateRendererStatic.eventHorizonRadius, null);
 				
-				vortexStart = 5.275f;
-				
-				float argState = (tick - vortexStart) / speedFactor;
+				float argState = (tick - VORTEX_START) / SPEED_FACTOR;
 								
 				if (argState < 1.342f)
 					rendererState.vortexState = EnumVortexState.FORMING;
@@ -256,7 +212,7 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 				else if (argState < 5.898f)
 					rendererState.vortexState = EnumVortexState.DECREASING;
 				else if ( rendererState.vortexState != EnumVortexState.CLOSING )
-					engageGate();
+					rendererState.vortexState = EnumVortexState.STILL;
 			}
 
 			float prevZ = 0;
@@ -265,7 +221,7 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 			boolean first = true;
 			
 			if ( !(rendererState.vortexState == EnumVortexState.STILL) ) {
-				float arg = (tick - vortexStart) / speedFactor;
+				float arg = (tick - VORTEX_START) / SPEED_FACTOR;
 								
 				if ( !(rendererState.vortexState == EnumVortexState.CLOSING))  {
 					if ( !(rendererState.vortexState == EnumVortexState.SHRINKING) ) {
@@ -277,7 +233,7 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 						float end = 0.75f;
 						
 						if ( rendererState.vortexState == (EnumVortexState.DECREASING) && arg >= 5.398+end ) {
-							engageGate();
+							rendererState.vortexState = EnumVortexState.STILL;
 						}
 						
 						if ( rendererState.vortexState == (EnumVortexState.FULL) ) {				
@@ -316,7 +272,7 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 								
 //								mul = 0.945f;
 								// Aunis.getRendererInit().new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul);
-								new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - whiteOverlayAlpha, 1);
+								new QuadStrip(8, rad, prevRad, tick).render(tick, zOffset*mul, prevZ*mul, false, 1.0f - rendererState.whiteOverlayAlpha, 1);
 								
 								prevZ = zOffset;
 								prevRad = rad;
@@ -326,19 +282,19 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 					
 					else {
 						// Going outwards, closing the gate 29
-						long stateChange = gateWaitClose + 35;
-						float arg2 = (float) ((world.getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
+						long stateChange = rendererState.gateWaitClose + 35;
+						float arg2 = (float) ((getWorld().getTotalWorldTime() - stateChange + partialTicks) / 3f) - 1.0f;
 												
 						if (arg2 < StargateRendererStatic.eventHorizonRadius+0.1f) {
-							backStrip = new QuadStrip(8, arg2, StargateRendererStatic.eventHorizonRadius, tick);
+							rendererState.backStrip = new QuadStrip(8, arg2, StargateRendererStatic.eventHorizonRadius, tick);
 						}
 						
 						else {
-							whiteOverlayAlpha = null;							
+							rendererState.whiteOverlayAlpha = null;							
 							
-							if (world.getTotalWorldTime() - stateChange - 9 > 7) {
+							if (getWorld().getTotalWorldTime() - stateChange - 9 > 7) {
 								rendererState.doEventHorizonRender = false;							
-								clearChevrons(stateChange + 9 + 7);
+//								clearChevrons(stateChange + 9 + 7);
 							}
 							
 							// return;
@@ -348,14 +304,14 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 				
 				else {					
 					// Fading out the event horizon, closing the gate
-					if ( (world.getTotalWorldTime() - gateWaitClose) > 35 ) {
-						float arg2 = (float) ((world.getTotalWorldTime() - (gateWaitClose+35) + partialTicks) / speedFactor / 2f);
+					if ( (getWorld().getTotalWorldTime() - rendererState.gateWaitClose) > 35 ) {
+						float arg2 = (float) ((getWorld().getTotalWorldTime() - (rendererState.gateWaitClose+35) + partialTicks) / SPEED_FACTOR / 2f);
 												
 						if ( arg2 <= Math.PI/6 )
-							whiteOverlayAlpha = MathHelper.sin( arg2 );
+							rendererState.whiteOverlayAlpha = MathHelper.sin( arg2 );
 						else {
-							if (backStrip == null)
-								backStrip = new QuadStrip(8, arg2, StargateRendererStatic.eventHorizonRadius, tick);
+							if (rendererState.backStrip == null)
+								rendererState.backStrip = new QuadStrip(8, arg2, StargateRendererStatic.eventHorizonRadius, tick);
 							
 							rendererState.vortexState = EnumVortexState.SHRINKING;
 						}
@@ -364,22 +320,17 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 			} // not still if
 		}
 						
-		// Rendering proper event horizon or the <backStrip> for vortex
+		// Rendering proper event horizon or the <rendererState.backStrip> for vortex
 		if (rendererState.vortexState != null) {
 			if ( rendererState.vortexState == (EnumVortexState.STILL) || rendererState.vortexState == EnumVortexState.CLOSING ) {
 				
-				if (horizonUnstable)
-					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
-
-//				if ( rendererState.vortexState == (EnumVortexState.CLOSING) || rendererState.vortexState == EnumVortexState.SHRINKING )
-//					renderEventHorizon(x, y, z, partialTicks, true, whiteOverlayAlpha, true, 1);
-//				else				
-//					renderEventHorizon(x, y, z, partialTicks, false, 0.0f, false, horizonUnstable ? 2f : 1);
+//				if (rendererState.horizonUnstable)
+//					ModelLoader.bindTexture(ModelLoader.getTexture("stargate/event_horizon_by_mclatchyt_2_unstable.jpg"));
 				
 				if ( rendererState.vortexState == EnumVortexState.CLOSING )
-					renderEventHorizon(partialTicks, true, whiteOverlayAlpha, false, 1.7f);
+					renderEventHorizon(partialTicks, true, rendererState.whiteOverlayAlpha, false, 1.7f);
 				else
-					renderEventHorizon(partialTicks, false, null, false, horizonUnstable ? 1.2f : 1);
+					renderEventHorizon(partialTicks, false, null, false, rendererState.horizonUnstable ? 1.2f : 1);
 					
 				GlStateManager.popMatrix();
 				GlStateManager.enableLighting();
@@ -388,12 +339,12 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 			}
 		}
 				
-		if (whiteOverlayAlpha != null) {
+		if (rendererState.whiteOverlayAlpha != null) {
 			GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			GlStateManager.enableBlend();
 			
-			if (backStrip != null)
-				backStrip.render(tick, 0f, null, false, 1.0f - whiteOverlayAlpha, 1);
+			if (rendererState.backStrip != null)
+				rendererState.backStrip.render(tick, 0f, null, false, 1.0f - rendererState.whiteOverlayAlpha, 1);
 			
 			renderEventHorizon(partialTicks, false, 0.0f, true, 1.0f);
 			
@@ -413,7 +364,7 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 	 * @param mul Multiplier of the horizon waving speed
 	 */
 	protected void renderEventHorizon(double partialTicks, boolean white, Float alpha, boolean backOnly, float mul) {			
-		float tick = (float) (world.getTotalWorldTime() + partialTicks) * mul;	
+		float tick = (float) (getWorld().getTotalWorldTime() + partialTicks);	
 		
 	    GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		GlStateManager.enableBlend();
@@ -450,5 +401,10 @@ public abstract class StargateAbstractRenderer implements RendererInterface {
 		}
 		
 		GlStateManager.disableBlend();
+	}
+	
+	@Override
+	public boolean isGlobalRenderer(StargateAbstractBaseTile te) {
+		return true;
 	}
 }

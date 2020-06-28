@@ -5,6 +5,7 @@ import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.Name;
 import net.minecraftforge.common.config.Config.RangeDouble;
 import net.minecraftforge.common.config.Config.RangeInt;
+import net.minecraftforge.common.config.Config.RequiresMcRestart;
 import net.minecraftforge.common.config.Config.RequiresWorldRestart;
 
 @Config(modid="aunis", name="aunis")
@@ -13,6 +14,9 @@ public class AunisConfig {
 	@Name("Stargate size")
 	@RequiresWorldRestart
 	public static StargateSizeEnum stargateSize = StargateSizeEnum.SMALL; 
+	
+	@Name("Stargate config options")
+	public static StargateConfig stargateConfig = new StargateConfig();
 	
 	@Name("DHD config options")
 	public static DHDConfig dhdConfig = new DHDConfig();
@@ -32,62 +36,60 @@ public class AunisConfig {
 	@Name("AutoClose options")
 	public static AutoCloseConfig autoCloseConfig = new AutoCloseConfig();
 	
+	@Name("Beamer options")
+	public static BeamerConfig beamerConfig = new BeamerConfig();
+	
+	@Name("Recipe options")
+	public static RecipeConfig recipeConfig = new RecipeConfig();
+	
+	public static class StargateConfig {
+		@Name("Orlin's gate max open count")
+		@RangeInt(min=0)
+		public int stargateOrlinMaxOpenCount = 2;
+		
+		@Name("Universe dialer max horizontal reach radius")
+		@RangeInt(min=0, max=64)
+		public int universeDialerReach = 10;
+
+		@Name("Universe dialer nearby radius")
+		public int universeGateNearbyReach = 1024;
+		
+		@Name("Disable animated Event Horizon")
+		@Comment({
+			"Changing this option will require you to reload resources manually.",
+			"Just press F3+Q once in-game."
+		})
+		public boolean disableAnimatedEventHorizon = false;
+	}
+	
 	public static class PowerConfig {
 		@Name("Stargate's internal buffer size")
-		@RangeInt(min=10000)
-		public int stargateEnergyStorage = 15728640;
+		@RangeInt(min=0)
+		public int stargateEnergyStorage = 71280000;
 		
 		@Name("Stargate's max power throughput")
 		@RangeInt(min=1)
-		public int stargateMaxEnergyTransfer = 5120;
-		
-		
+		public int stargateMaxEnergyTransfer = 26360;
 		
 		@Name("Stargate wormhole open power draw")
-		@Comment({
-			"Calculated as per block one-time draw.",
-			"So, if this field is 150, 1500 RF would be required",
-			"to open a tunnel 10m across. Drawed only once per open."
-		})
-		@RangeDouble(min=0)
-		public double openingBlockToEnergyRatio = 1536 / 10.0; // 1,536 RF / 10m
+		@RangeInt(min=0)
+		public int openingBlockToEnergyRatio = 4608;
 		
 		@Name("Stargate wormhole sustain power draw")
-		@Comment({
-			"Drawed each tick. This is multipiled by distance."
-		})
-		@RangeDouble(min=0)
-		public double keepAliveBlockToEnergyRatioPerTick = 8 / 10.0; // 8 RF / 10m PER ONE TICK
-
-		@Name("Stargate instability threshold(seconds to close)")
-		@RangeInt(min=1)
-		public int instabilitySeconds = 10;
-		
-		@Name("Energy draw multiplier for cross-dimension travel")
-		@RangeDouble(min=1)
-		public double crossDimensionMul = 2.0;
-		
-//		@Name("Energy draw multiplier for Nether")
-//		@RangeDouble(min=1)
-//		public double netherMultiplier = 2.0;
-//
-//		@Name("Energy draw multiplier for The End")
-//		@RangeDouble(min=1)
-//		public double theEndMultiplier = 2.5;
-		
-		
-		
-		@Name("Minimal energy required by DHD to be functional")
 		@RangeInt(min=0)
-		public int dhdMinimalEnergy = 5120;
+		public int keepAliveBlockToEnergyRatioPerTick = 2;
 
-		@Name("Power crystal buffer size")
-		@RangeInt(min=10000)
-		public int dhdCrystalEnergyStorage = 15728640; // 14 000 000
+		@Name("Stargate instability threshold (seconds of energy left before gate becomes unstable)")
+		@RangeInt(min=1)
+		public int instabilitySeconds = 20;
 		
-		@Name("Power crystal max IO")
-		@RangeInt(min=10000)
-		public int dhdCrystalMaxEnergyTransfer = 5120; // 140 000
+		@Name("Orlin's gate energy multiplier")
+		@RangeDouble(min=0)
+		public double stargateOrlinEnergyMul = 2.0;
+		
+		@Name("Universe gate energy multiplier")
+		@RangeDouble(min=0)
+		public double stargateUniverseEnergyMul = 1.5;
 	}
 	
 	public static class RingsConfig {
@@ -111,6 +113,28 @@ public class AunisConfig {
 		@Name("DHD range's radius vertical")
 		@RangeInt(min=1)
 		public int rangeVertical = 5;
+		
+		@Name("DHD's max fluid capacity")
+		@RangeInt(min=1)
+		public int fluidCapacity = 60000;
+
+		@Name("Energy per 1mB Naquadah")
+		@RangeInt(min=1)
+		public int energyPerNaquadah = 10240;
+
+		@Name("Generation multiplier")
+		@RangeInt(min=1)
+		@Comment({
+			"Energy per 1mB is multiplied by this",
+			"Consumed mB/t is equal to this"
+		})
+		public int powerGenerationMultiplier = 1;
+
+		@RangeDouble(min=0, max=1)
+		public double activationLevel = 0.4;
+		
+		@RangeDouble(min=0, max=1)
+		public double deactivationLevel = 0.98;
 	}
 	
 	public static class DebugConfig {
@@ -136,21 +160,49 @@ public class AunisConfig {
 		@RangeInt(min=1, max=30000000)
 		public int minOverworldCoords = 15000;
 		
-		@Name("Chance of despawning Crystal")
-		@RangeDouble(min=0, max=1)
-		public double despawnCrystalChance = 0.05;
-		
 		@Name("Chance of despawning DHD")
 		@RangeDouble(min=0, max=1)
 		public double despawnDhdChance = 0.05;
 	}
 	
 	public static class AutoCloseConfig {
-		@Name("autoclose enabled")
-		public boolean autocloseEnabled = false;
+		@Name("Autoclose enabled")
+		public boolean autocloseEnabled = true;
 		
 		@Name("Seconds to autoclose with no players nearby")
 		@RangeInt(min=1, max=300)
-		public int secondsToAutoclose = 10;
+		public int secondsToAutoclose = 5;
+	}
+	
+	public static class BeamerConfig {
+		@Name("Fluid buffer capacity")
+		@RangeInt(min=1)
+		public int fluidCapacity = 60000;
+		
+		@Name("Energy buffer capacity")
+		@RangeInt(min=1)
+		public int energyCapacity = 17820000;
+		
+		@Name("Energy buffer max transfer")
+		@RangeInt(min=1)
+		public int energyTransfer = 26360;
+		
+		@Name("Fluid max transfer")
+		@RangeInt(min=1)
+		public int fluidTransfer = 100;
+		
+		@Name("Item max transfer")
+		@RangeInt(min=1)
+		public int itemTransfer = 4;
+	}
+	
+	public static class RecipeConfig {
+		@Name("Enable silicon recipes")
+		@RequiresMcRestart
+		@Comment({
+			"Should Molten Silicon require Silicon (provided by other mods)",
+			"or just plain sand. Disable if having balance issues with AE/EnderIO silicon."
+		})
+		public boolean enableSiliconRecipes = true;
 	}
 }

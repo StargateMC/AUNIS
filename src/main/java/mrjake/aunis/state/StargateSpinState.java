@@ -1,51 +1,36 @@
 package mrjake.aunis.state;
 
 import io.netty.buffer.ByteBuf;
-import mrjake.aunis.stargate.EnumSymbol;
+import mrjake.aunis.stargate.EnumSpinDirection;
+import mrjake.aunis.stargate.network.SymbolInterface;
+import mrjake.aunis.stargate.network.SymbolTypeEnum;
 
-public class StargateSpinState extends SpinState {
+public class StargateSpinState extends State {
+	public StargateSpinState() {}
 	
-	/**
-	 * Symbol being locked or engaged.
-	 */
-	public EnumSymbol targetSymbol = null;
+	public SymbolInterface targetSymbol;
+	public EnumSpinDirection direction;
+	public boolean setOnly;
 	
-	/**
-	 * Indicates if final chevron lock sound has been played
-	 */
-	public boolean lockSoundPlayed = false;
-	
-	/**
-	 * If the ring is spinned by a computer
-	 */
-	public boolean computerInitializedStop = false;
-	
-	/**
-	 * If it's the final chevron or not
-	 */
-	public boolean finalChevron = false;
-	
-	
+	public StargateSpinState(SymbolInterface targetSymbol, EnumSpinDirection direction, boolean setOnly) {
+		this.targetSymbol = targetSymbol;
+		this.direction = direction;
+		this.setOnly = setOnly;
+	}
+
 	@Override
 	public void toBytes(ByteBuf buf) {
-		super.toBytes(buf);
-		
-		buf.writeInt(targetSymbol != null ? targetSymbol.id : -1);
-		buf.writeBoolean(lockSoundPlayed);
-		buf.writeBoolean(computerInitializedStop);
-		buf.writeBoolean(finalChevron);
+		buf.writeInt(targetSymbol.getSymbolType().id);
+		buf.writeInt(targetSymbol.getId());
+		buf.writeInt(direction.id);
+		buf.writeBoolean(setOnly);
 	}
 	
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		super.fromBytes(buf);
-		
-		int targetSymbolId = buf.readInt();
-		if (targetSymbolId != -1)
-			targetSymbol = EnumSymbol.valueOf(targetSymbolId);
-		
-		lockSoundPlayed = buf.readBoolean();
-		computerInitializedStop = buf.readBoolean();
-		finalChevron = buf.readBoolean();
+		SymbolTypeEnum symbolType = SymbolTypeEnum.valueOf(buf.readInt());
+		targetSymbol = symbolType.valueOfSymbol(buf.readInt());
+		direction = EnumSpinDirection.valueOf(buf.readInt());
+		setOnly = buf.readBoolean();
 	}
 }

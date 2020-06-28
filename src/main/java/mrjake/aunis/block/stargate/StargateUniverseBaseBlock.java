@@ -1,0 +1,25 @@
+package mrjake.aunis.block.stargate;
+
+import mrjake.aunis.tileentity.stargate.StargateClassicBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
+
+public class StargateUniverseBaseBlock extends StargateClassicBaseBlock {
+
+	private static final String BLOCK_NAME = null;
+
+	public StargateUniverseBaseBlock() {
+		super();
+		
+		setResistance(20.0f);
+	}
+	
+	@Override
+	protected String getBlockName() {
+		return BLOCK_NAME;
+	}
+
+	@Override
+	protected StargateClassicBaseTile getTileEntity() {
+		return new StargateUniverseBaseTile();
+	}
+}

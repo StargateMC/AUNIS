@@ -13,6 +13,6 @@ public class AunisCreativeTab extends CreativeTabs {
 	
 	@Override
 	public ItemStack createIcon() {
-		return new ItemStack(AunisBlocks.trControllerBlock);
+		return new ItemStack(AunisBlocks.TR_CONTROLLER_BLOCK);
 	}
 }

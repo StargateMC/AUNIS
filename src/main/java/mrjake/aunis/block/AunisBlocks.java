@@ -8,15 +8,23 @@ import mrjake.aunis.block.stargate.StargateMilkyWayBaseBlock;
 import mrjake.aunis.block.stargate.StargateMilkyWayMemberBlock;
 import mrjake.aunis.block.stargate.StargateOrlinBaseBlock;
 import mrjake.aunis.block.stargate.StargateOrlinMemberBlock;
+import mrjake.aunis.block.stargate.StargateUniverseBaseBlock;
+import mrjake.aunis.block.stargate.StargateUniverseMemberBlock;
+import mrjake.aunis.item.CapacitorItemBlock;
 import mrjake.aunis.item.StargateMilkyWayMemberItemBlock;
+import mrjake.aunis.item.StargateUniverseMemberItemBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
-import mrjake.aunis.tileentity.CrystalInfuserTile;
+import mrjake.aunis.tileentity.BeamerTile;
+import mrjake.aunis.tileentity.CapacitorTile;
 import mrjake.aunis.tileentity.DHDTile;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayBaseTile;
 import mrjake.aunis.tileentity.stargate.StargateMilkyWayMemberTile;
 import mrjake.aunis.tileentity.stargate.StargateOrlinBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateOrlinMemberTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseBaseTile;
+import mrjake.aunis.tileentity.stargate.StargateUniverseMemberTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -34,38 +42,48 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber
 public class AunisBlocks {
-	public static NaquadahOreBlock naquadahOreBlock = new NaquadahOreBlock();
-	public static Block naquadahBlock = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
+	public static final NaquadahOreBlock ORE_NAQUADAH_BLOCK = new NaquadahOreBlock("naquadah_ore");
+	public static final NaquadahOreBlock ORE_NAQUADAH_BLOCK_STONE = new NaquadahOreBlock("naquadah_ore_stone");
+	public static final Block NAQUADAH_BLOCK = new Block(Material.IRON).setRegistryName(Aunis.ModID, "naquadah_block").setTranslationKey(Aunis.ModID + ".naquadah_block");
 	
-	public static StargateMilkyWayBaseBlock stargateMilkyWayBaseBlock = new StargateMilkyWayBaseBlock();	
-	public static StargateOrlinBaseBlock stargateOrlinBaseBlock = new StargateOrlinBaseBlock();	
-	public static StargateOrlinMemberBlock stargateOrlinMemberBlock = new StargateOrlinMemberBlock();	
+//	public static final StargateMilkyWayBaseBlock STARGATE_MILKY_WAY_BASE_BLOCK = new StargateMilkyWayBaseBlock();	
+//	public static final StargateUniverseBaseBlock STARGATE_UNIVERSE_BASE_BLOCK = new StargateUniverseBaseBlock();	
+//	public static final StargateOrlinBaseBlock STARGATE_ORLIN_BASE_BLOCK = new StargateOrlinBaseBlock();	
+//	public static final StargateOrlinMemberBlock STARGATE_ORLIN_MEMBER_BLOCK = new StargateOrlinMemberBlock();	
 	
-	public static DHDBlock dhdBlock = new DHDBlock();
-	public static CrystalInfuserBlock crystalInfuserBlock = new CrystalInfuserBlock();
+//	public static final DHDBlock DHD_BLOCK = new DHDBlock();
 	
-	public static TransportRingsBlock transportRingsBlock = new TransportRingsBlock();
-	public static TRControllerBlock trControllerBlock = new TRControllerBlock();
-	public static InvisibleBlock invisibleBlock = new InvisibleBlock();	
-	
+	public static final TransportRingsBlock TRANSPORT_RINGS_BLOCK = new TransportRingsBlock();
+	public static final TRControllerBlock TR_CONTROLLER_BLOCK = new TRControllerBlock();
+	public static final InvisibleBlock INVISIBLE_BLOCK = new InvisibleBlock();	
+		
 	// -----------------------------------------------------------------------------
-	public static StargateMilkyWayMemberBlock stargateMilkyWayMemberBlock = new StargateMilkyWayMemberBlock();
+//	public static final StargateMilkyWayMemberBlock STARGATE_MILKY_WAY_MEMBER_BLOCK = new StargateMilkyWayMemberBlock();
+//	public static final StargateUniverseMemberBlock STARGATE_UNIVERSE_MEMBER_BLOCK = new StargateUniverseMemberBlock();
+	
+	public static final CapacitorBlockEmpty CAPACITOR_BLOCK_EMPTY = new CapacitorBlockEmpty();
+	public static final CapacitorBlock CAPACITOR_BLOCK = new CapacitorBlock();
+	public static final BeamerBlock BEAMER_BLOCK = new BeamerBlock();
 	
 	
 	private static Block[] blocks = {
-		//naquadahOreBlock,
-		//naquadahBlock,
+		ORE_NAQUADAH_BLOCK,
+		ORE_NAQUADAH_BLOCK_STONE,
+		NAQUADAH_BLOCK,
 		
-		//stargateMilkyWayBaseBlock,
-		//stargateOrlinBaseBlock,
-		//stargateOrlinMemberBlock,
+//		STARGATE_MILKY_WAY_BASE_BLOCK,
+//		STARGATE_UNIVERSE_BASE_BLOCK,
+//		STARGATE_ORLIN_BASE_BLOCK,
+//		STARGATE_ORLIN_MEMBER_BLOCK,
 		
-		//dhdBlock,
-		//crystalInfuserBlock,
+//		DHD_BLOCK,
 		
-		transportRingsBlock,
-		trControllerBlock,
-		invisibleBlock
+		TRANSPORT_RINGS_BLOCK,
+		TR_CONTROLLER_BLOCK,
+		INVISIBLE_BLOCK,
+		
+		CAPACITOR_BLOCK_EMPTY,
+		BEAMER_BLOCK
 	};
 		
 	@SubscribeEvent
@@ -73,16 +91,22 @@ public class AunisBlocks {
 		IForgeRegistry<Block> registry = event.getRegistry();
 		
 		registry.registerAll(blocks);
-//		registry.register(stargateMilkyWayMemberBlock);
-//		
-//		GameRegistry.registerTileEntity(StargateMilkyWayBaseTile.class, AunisBlocks.stargateMilkyWayBaseBlock.getRegistryName());
-//		GameRegistry.registerTileEntity(StargateOrlinBaseTile.class, AunisBlocks.stargateOrlinBaseBlock.getRegistryName());
-//		
-//		GameRegistry.registerTileEntity(StargateMilkyWayMemberTile.class, AunisBlocks.stargateMilkyWayMemberBlock.getRegistryName());
-//		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.dhdBlock.getRegistryName());
-//		GameRegistry.registerTileEntity(CrystalInfuserTile.class, AunisBlocks.crystalInfuserBlock.getRegistryName());
-		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.transportRingsBlock.getRegistryName());
-		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.trControllerBlock.getRegistryName());
+//		registry.register(STARGATE_MILKY_WAY_MEMBER_BLOCK);
+//		registry.register(STARGATE_UNIVERSE_MEMBER_BLOCK);
+		registry.register(CAPACITOR_BLOCK);
+		
+//		GameRegistry.registerTileEntity(StargateMilkyWayBaseTile.class, AunisBlocks.STARGATE_MILKY_WAY_BASE_BLOCK.getRegistryName());
+//		GameRegistry.registerTileEntity(StargateUniverseBaseTile.class, AunisBlocks.STARGATE_UNIVERSE_BASE_BLOCK.getRegistryName());
+//		GameRegistry.registerTileEntity(StargateOrlinBaseTile.class, AunisBlocks.STARGATE_ORLIN_BASE_BLOCK.getRegistryName());
+		
+//		GameRegistry.registerTileEntity(StargateMilkyWayMemberTile.class, AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK.getRegistryName());
+//		GameRegistry.registerTileEntity(StargateUniverseMemberTile.class, AunisBlocks.STARGATE_UNIVERSE_MEMBER_BLOCK.getRegistryName());
+//		GameRegistry.registerTileEntity(StargateOrlinMemberTile.class, AunisBlocks.STARGATE_ORLIN_MEMBER_BLOCK.getRegistryName());
+//		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.DHD_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.TRANSPORT_RINGS_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.TR_CONTROLLER_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(CapacitorTile.class, AunisBlocks.CAPACITOR_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(BeamerTile.class, AunisBlocks.BEAMER_BLOCK.getRegistryName());
 	}
 	
 	@SubscribeEvent
@@ -92,7 +116,9 @@ public class AunisBlocks {
 		for (Block block : blocks)
 			registry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
 		
-//		registry.register(new StargateMilkyWayMemberItemBlock(stargateMilkyWayMemberBlock));		
+//		registry.register(new StargateMilkyWayMemberItemBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK));		
+//		registry.register(new StargateUniverseMemberItemBlock(STARGATE_UNIVERSE_MEMBER_BLOCK));		
+		registry.register(new CapacitorItemBlock(CAPACITOR_BLOCK));
 	}
 	
 	@SubscribeEvent
@@ -101,28 +127,32 @@ public class AunisBlocks {
 			ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}
 		
-		//int ringMeta = stargateMilkyWayMemberBlock.getMetaFromState(stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
-		//int chevronMeta = stargateMilkyWayMemberBlock.getMetaFromState(stargateMilkyWayMemberBlock.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
+		//int ringMeta = STARGATE_MILKY_WAY_MEMBER_BLOCK.getMetaFromState(STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.RING));
+//		int chevronMeta = STARGATE_MILKY_WAY_MEMBER_BLOCK.getMetaFromState(STARGATE_MILKY_WAY_MEMBER_BLOCK.getDefaultState().withProperty(AunisProps.MEMBER_VARIANT, EnumMemberVariant.CHEVRON));
+//		
+//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_milkyway_ring_block"));
+//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
+//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), ringMeta, new ModelResourceLocation("aunis:stargate_universe_ring_block"));
+//		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(STARGATE_UNIVERSE_MEMBER_BLOCK), chevronMeta, new ModelResourceLocation("aunis:stargate_universe_chevron_block"));
 		
-		//ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMilkyWayMemberBlock), ringMeta, new ModelResourceLocation("aunis:stargate_milkyway_ring_block"));
-		//ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(stargateMilkyWayMemberBlock), chevronMeta, new ModelResourceLocation("aunis:stargate_milkyway_chevron_block"));
+		ModelLoader.setCustomModelResourceLocation(ItemBlock.getItemFromBlock(CAPACITOR_BLOCK), 0, new ModelResourceLocation(CAPACITOR_BLOCK.getRegistryName(), "inventory"));
 	}
 	
 	@Nullable
 	public static Block remapBlock(String oldBlockName) {
 		switch (oldBlockName) {
-			case "aunis:stargatebase_block":
-				return stargateMilkyWayBaseBlock;
-				
-			case "aunis:stargate_member_block":
-				return stargateMilkyWayMemberBlock;
-				
-			case "aunis:stargatebase_orlin_block":
-				return stargateOrlinBaseBlock;
-				
-			case "aunis:stargatemember_orlin_block":
-				return stargateOrlinMemberBlock;
-				
+//			case "aunis:stargatebase_block":
+//				return STARGATE_MILKY_WAY_BASE_BLOCK;
+//				
+//			case "aunis:stargate_member_block":
+//				return STARGATE_MILKY_WAY_MEMBER_BLOCK;
+//				
+//			case "aunis:stargatebase_orlin_block":
+//				return STARGATE_ORLIN_BASE_BLOCK;
+//				
+//			case "aunis:stargatemember_orlin_block":
+//				return STARGATE_ORLIN_MEMBER_BLOCK;
+//				
 			default:
 				return null;
 		}
@@ -142,21 +172,21 @@ public class AunisBlocks {
 	public static void onMissingItemMappings(RegistryEvent.MissingMappings<Item> event) {
 		for (Mapping<Item> mapping : event.getMappings()) {
 			switch (mapping.key.toString()) {
-				case "aunis:stargatebase_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateMilkyWayBaseBlock));
-					break;
-				
-				case "aunis:stargate_member_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateMilkyWayMemberBlock));
-					break;
-					
-				case "aunis:stargatebase_orlin_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateOrlinBaseBlock));
-					break;
-					
-				case "aunis:stargatemember_orlin_block":
-					mapping.remap(ItemBlock.getItemFromBlock(stargateOrlinMemberBlock));
-					break;
+//				case "aunis:stargatebase_block":
+//					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_BASE_BLOCK));
+//					break;
+//				
+//				case "aunis:stargate_member_block":
+//					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_MILKY_WAY_MEMBER_BLOCK));
+//					break;
+//					
+//				case "aunis:stargatebase_orlin_block":
+//					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_ORLIN_BASE_BLOCK));
+//					break;
+//					
+//				case "aunis:stargatemember_orlin_block":
+//					mapping.remap(ItemBlock.getItemFromBlock(STARGATE_ORLIN_MEMBER_BLOCK));
+//					break;
 			}
 		}
 	}

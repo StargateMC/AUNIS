@@ -1,8 +1,10 @@
 package mrjake.aunis.stargate;
 
+import mrjake.aunis.stargate.network.SymbolInterface;
+
 public enum EnumSpinDirection {
-	COUNTER_CLOCKWISE(0, 1),
-	CLOCKWISE(1, -1);
+	COUNTER_CLOCKWISE(0, -1),
+	CLOCKWISE(1, 1);
 	
 	public int id;
 	public int mul;
@@ -20,19 +22,20 @@ public enum EnumSpinDirection {
 			return CLOCKWISE;
 	}
 
-	public double getDistance(double ringAngularRotation, float angle) {
-		double distance = ringAngularRotation - angle;
+	public float getDistance(SymbolInterface currentRingSymbol, SymbolInterface targetRingSymbol) {
+		int indexDiff;
 		
-		if (distance < 0) {
-			if (this == CLOCKWISE) distance += 360;
-			else distance *= -1;
-		}
+		if (this == CLOCKWISE)
+			indexDiff = currentRingSymbol.getAngleIndex() - targetRingSymbol.getAngleIndex();
+		else
+			indexDiff = targetRingSymbol.getAngleIndex() - currentRingSymbol.getAngleIndex();
 		
-		else {
-			if (this == COUNTER_CLOCKWISE) distance += 360;
-		}
+		float angle = indexDiff * currentRingSymbol.getSymbolType().getAnglePerGlyph();
 		
-		return distance;
+		if (angle < 0)
+			angle += 360;
+		
+		return angle;
 	}
 	
 	public static EnumSpinDirection valueOf(int id) {

@@ -3,13 +3,12 @@ package mrjake.aunis.raycaster;
 import java.util.Arrays;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector3f;
-
 import mrjake.aunis.AunisProps;
 import mrjake.aunis.packet.AunisPacketHandler;
 import mrjake.aunis.packet.transportrings.TRControllerActivatedToServer;
 import mrjake.aunis.raycaster.util.Ray;
 import mrjake.aunis.renderer.transportrings.TRControllerRenderer;
+import mrjake.vector.Vector3f;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -56,7 +55,7 @@ public class RaycasterRingsController extends Raycaster {
 		EnumFacing facing = world.getBlockState(pos).getValue(AunisProps.FACING_HORIZONTAL);
 		float rotation = TRControllerRenderer.getRotation(facing);
 		
-		super.onActivated(world, pos, player, rotation);
+		super.onActivated(world, pos, player, rotation, EnumHand.MAIN_HAND);
 	}
 	
 	@Override
@@ -79,5 +78,5 @@ public class RaycasterRingsController extends Raycaster {
 	}
 	
 	@Override
-	protected void brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos) {}
+	protected boolean brbCheck(List<Ray> brbRayList, Vec3d lookVec, EntityPlayer player, BlockPos pos, EnumHand hand) { return false; }
 }

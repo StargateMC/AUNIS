@@ -3,7 +3,7 @@ package mrjake.aunis.raycaster.util;
 import java.util.Arrays;
 import java.util.List;
 
-import org.lwjgl.util.vector.Vector2f;
+import mrjake.vector.Vector2f;
 
 public class Box {
 	private List<Ray> rays;
@@ -54,7 +54,15 @@ public class Box {
 			}
 			
 		}
-				
+		
+//		if (intersects%2 > 0) {
+//			Aunis.info(String.format("(%f,%f)", p.x, p.y));
+//			Aunis.info(String.format("y=%fx+%f", a, b));
+//			
+//			for (Ray ray : rays)
+//				Aunis.info(ray.toString());
+//		}
+		
 		return (intersects%2 > 0);		
 	}
 }

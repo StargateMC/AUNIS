@@ -1,8 +1,6 @@
 package mrjake.aunis.renderer.transportrings;
 
-import mrjake.aunis.OBJLoader.Model;
-import mrjake.aunis.OBJLoader.ModelLoader;
-import mrjake.aunis.OBJLoader.ModelLoader.EnumModel;
+import mrjake.aunis.loader.ElementEnum;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -34,21 +32,14 @@ public class Ring {
 		this.yMax = 4-index + 1.5;
 	}
 
-	public void render(double partialTicks) {
-//		ModelLoader.loadModel(EnumModel.RingsBlack);
-		
+	public void render(double partialTicks) {		
 		if (shouldRender) {
-			Model ringModel = ModelLoader.getModel(EnumModel.RingsBlack);
-		
-			if (ringModel != null) {
-				EnumModel.RingsBlack.bindTexture();
-				
-				GlStateManager.pushMatrix();				
-				GlStateManager.translate(0, y, 0);
-				
-				ringModel.render();
-				GlStateManager.popMatrix();
-			}
+			GlStateManager.pushMatrix();				
+			GlStateManager.translate(0, y, 0);
+			
+			ElementEnum.RINGS_BLACK.bindTextureAndRender();
+			GlStateManager.popMatrix();
+
 		}
 		
 		if (shouldAnimate) {

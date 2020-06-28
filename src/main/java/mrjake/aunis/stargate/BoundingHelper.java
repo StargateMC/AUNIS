@@ -33,18 +33,18 @@ public class BoundingHelper {
 		}
 		
 		else {	
-			if (state.getBlock() == AunisBlocks.stargateMilkyWayMemberBlock && access.getBlockState(pos).getBlock() == AunisBlocks.stargateMilkyWayMemberBlock) {
-				state = state.getBlock().getExtendedState(state, access, pos);
-				IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
-				
-				if (camoState != null) {
-					Block block = camoState.getBlock();
-				
-					if (block instanceof BlockSlab && !((BlockSlab) block).isDouble()) {
-						return new AxisAlignedBB(0, 0, 0, 1, 0.5, 1);
-					}
-				}
-			}
+//			if (state.getBlock() == (Block)AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK && access.getBlockState(pos).getBlock() == (Block)AunisBlocks.STARGATE_MILKY_WAY_MEMBER_BLOCK) {
+//				state = state.getBlock().getExtendedState(state, access, pos);
+//				IBlockState camoState = ((IExtendedBlockState) state).getValue(AunisProps.CAMO_BLOCKSTATE);
+//				
+//				if (camoState != null) {
+//					Block block = camoState.getBlock();
+//				
+//					if (block instanceof BlockSlab && !((BlockSlab) block).isDouble()) {
+//						return new AxisAlignedBB(0, 0, 0, 1, 0.5, 1);
+//					}
+//				}
+//			}
 		}
 		
 		return new AxisAlignedBB(0, 0, 0, 1, 1, 1);

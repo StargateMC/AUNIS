@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Network;
 import li.cil.oc.api.network.Node;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
 public interface OCWrapperInterface {
@@ -36,4 +38,16 @@ public interface OCWrapperInterface {
 	 * @param tileEntity {@link TileEntity} to be linked.
 	 */
 	public void joinOrCreateNetwork(TileEntity tileEntity);
+
+	/**
+	 * @return {@code True} if the OpenComputers mod is loaded, {@code false} otherwise.
+	 */
+	public boolean isModLoaded();
+	
+	public void sendWirelessPacketPlayer(EntityPlayer player, ItemStack stack, String address, short port, Object[] data);
+
+	public void joinWirelessNetwork(Object endpoint);
+	public void leaveWirelessNetwork(Object endpoint);
+	public void updateWirelessNetwork(Object endpoint);
+
 }

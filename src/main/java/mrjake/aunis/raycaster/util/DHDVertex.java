@@ -1,9 +1,8 @@
 package mrjake.aunis.raycaster.util;
 
-import org.lwjgl.util.vector.Matrix3f;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
-
+import mrjake.vector.Matrix3f;
+import mrjake.vector.Vector2f;
+import mrjake.vector.Vector3f;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -13,21 +12,21 @@ public class DHDVertex {
 	public final float y;
 	public final float z;
 	
-	private float xRotated;
-	private float yRotated;
-	private float zRotated;
+	private double xRotated;
+	private double yRotated;
+	private double zRotated;
 	
-	private float xGlobal;
-	private float yGlobal;
-	private float zGlobal;
+	private double xGlobal;
+	private double yGlobal;
+	private double zGlobal;
 	
-	public float getGlobalX() { return xGlobal; }
-	public float getGlobalY() { return yGlobal; }
-	public float getGlobalZ() { return zGlobal; }
+	public double getGlobalX() { return xGlobal; }
+	public double getGlobalY() { return yGlobal; }
+	public double getGlobalZ() { return zGlobal; }
 	
-	public float xDiffrence;
-	public float yDiffrence;
-	public float zDiffrence;
+	public double xDiffrence;
+	public double yDiffrence;
+	public double zDiffrence;
 	
 	BlockPos oldGlobal = null;
 	private Vec3d lastPlayerPos = new Vec3d(0,0,0);
