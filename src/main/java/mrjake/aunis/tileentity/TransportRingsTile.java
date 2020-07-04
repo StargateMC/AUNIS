@@ -56,6 +56,7 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import noppes.npcs.entity.EntityCustomNpc;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
 public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment {
@@ -143,6 +144,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				BlockPos teleportVector = targetRingsPos.subtract(pos);
 				
 				for (Entity entity : teleportList) {
+                                        if (entity instanceof EntityCustomNpc) continue;
 					if (!excludedEntities.contains(entity)) {
 						BlockPos ePos = entity.getPosition().add(teleportVector);		
 						
