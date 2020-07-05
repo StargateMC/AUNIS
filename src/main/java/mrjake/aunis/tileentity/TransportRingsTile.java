@@ -144,7 +144,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				BlockPos teleportVector = targetRingsPos.subtract(pos);
 				
 				for (Entity entity : teleportList) {
-                                        if (entity instanceof EntityCustomNpc) continue;
+                                        if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
 					if (!excludedEntities.contains(entity)) {
 						BlockPos ePos = entity.getPosition().add(teleportVector);		
 						
