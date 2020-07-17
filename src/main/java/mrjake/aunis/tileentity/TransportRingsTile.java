@@ -103,8 +103,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
                             RingMap.removeOldAddress(this, address);
                         }
                         if (address == null && getResolvedAddress() != null) {
-                            System.out.println("Adding address: " + address + " to ring!");
                             RingMap.addOrUpdateEntryFor(this, getResolvedAddress());
+                            System.out.println("Adding address: " + address + " to ring!");
                         }
 		}
 	}
@@ -275,8 +275,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			return TransportResult.BUSY;
 		}
 		
-		TransportRings rings = ringsMap.get(address);
-				
+		TransportRings rings = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address).getRings().getRings();
+                		
 		// Binding exists
 		if (rings != null) {
 			BlockPos targetRingsPos = rings.getPos();

@@ -91,7 +91,7 @@ public class RingMap extends WorldSavedData {
         try {
             for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
         	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
-                for (RingAddressEntry srae : RingMap.getRingsForFrequency(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
+                for (RingAddressEntry srae : this.getRingsForFrequencyInstanced(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
                     ringsTilesInRange.add(srae.getRings());
                 }
 		
