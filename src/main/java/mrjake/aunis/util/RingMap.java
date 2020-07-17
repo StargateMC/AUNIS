@@ -80,10 +80,16 @@ public class RingMap extends WorldSavedData {
 //    
     public void updateRings(String address, int frequency) {
         int count = 0;
-        for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
-		rae.getRings().removeAllRings();
-        }
-        for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
+		try {
+                    for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
+                                rae.getRings().removeAllRings();
+                    }
+                } catch (Exception e) {
+                    System.out.println("Failed to clear rings for address: " + address + " and freq: " + frequency);
+                    e.printStackTrace();
+                }
+        try {
+            for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
         	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
                 for (RingAddressEntry srae : RingMap.getRingsForFrequency(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
                     ringsTilesInRange.add(srae.getRings());
@@ -98,6 +104,10 @@ public class RingMap extends WorldSavedData {
 		}
 		
 		rae.getRings().markDirty();
+        }
+        } catch (Exception e) {
+                    System.out.println("Failed to update rings for address: " + address + " and freq: " + frequency);
+                    e.printStackTrace();
         }
     }
 //    public TransportRingsTile getNearestRing(World w, BlockPos pos) {
