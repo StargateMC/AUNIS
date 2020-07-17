@@ -19,7 +19,7 @@ public class PlayerFadeOutRenderEvent {
 	private static boolean fadeOut;
 	
 	public static double calcFog(World world, long tickStart, double partialTicks) {
-		double effTick = world.getTotalWorldTime() - tickStart + partialTicks;
+		double effTick = System.currentTimeMillis() - tickStart + partialTicks;
 				
 		return -(effTick * (effTick-TransportRingsTile.FADE_OUT_TOTAL_TIME)) / (20*20);
 	}
@@ -77,7 +77,7 @@ public class PlayerFadeOutRenderEvent {
 
 	public static void startFadeOut() {
 		world = Minecraft.getMinecraft().world;
-		tickStart = world.getTotalWorldTime();
+		tickStart = System.currentTimeMillis();
 		
 		fadeOut = true;
 	}
