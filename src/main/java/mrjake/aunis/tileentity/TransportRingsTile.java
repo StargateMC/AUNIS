@@ -393,7 +393,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	private TransportRings rings;
 	public TransportRings getRings() {
 		if (rings == null)
-			rings = new TransportRings(pos,world.provider.getDimension());
+			rings = new TransportRings(getPos(),world.provider.getDimension());
 		
 		return rings;
 	}
@@ -421,7 +421,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	 * @param caller - Caller rings tile
 	 */
 	public void addRings(TransportRingsTile caller) {
-		TransportRings clonedRings = caller.getClonedRings(this.pos, this.world.provider.getDimension());
+		TransportRings clonedRings = caller.getClonedRings(caller.getPos(), caller.world.provider.getDimension());
 		
 		if (clonedRings.isInGrid()) {
 			ringsMap.put(clonedRings.getAddress(), clonedRings);
