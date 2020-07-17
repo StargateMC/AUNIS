@@ -1,5 +1,6 @@
 package mrjake.aunis.tileentity;
 
+import com.stargatemc.api.CoreAPI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
+import net.minecraft.entity.player.EntityPlayer;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import mrjake.aunis.Aunis;
@@ -188,6 +190,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
                                         if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
 					if (!excludedEntities.contains(entity)) {
 						BlockPos ePos = entity.getPosition().add(teleportVector);		
+                                                if (entity instanceof EntityPlayer) CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
 						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
 					}
 				}
@@ -220,6 +223,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// Teleportation
 	private BlockPos targetRingsPos = new BlockPos(0, 0, 0);
 	private List<Entity> excludedEntities = new ArrayList<>();
+        private int targetDimension = 0;
 	private Object ocContext;
 	private boolean initiating;
 	
@@ -299,7 +303,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
-			startAnimationAndTeleport(targetRingsPos, excludedEntities, waitTime, true);
+			this.targetDimension = targetRingsTile.world.provider.getDimension();
+                        startAnimationAndTeleport(targetRingsPos, excludedEntities, waitTime, true);
 			
 			return TransportResult.OK;
 		}
