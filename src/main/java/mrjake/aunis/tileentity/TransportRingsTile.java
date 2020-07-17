@@ -205,7 +205,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				setBarrierBlocks(false, false);
 				setBusy(false);
 				
-				TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
+				TransportRingsTile targetRingsTile = (TransportRingsTile) CoreAPI.getWorldForDimension(targetDimension).getTileEntity(targetRingsPos);
 				if (targetRingsTile != null)
 					targetRingsTile.setBusy(false);
 				
