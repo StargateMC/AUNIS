@@ -7,6 +7,7 @@ import mrjake.aunis.state.StateTypeEnum;
 import mrjake.aunis.tileentity.TRControllerTile;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import mrjake.aunis.util.LinkingHelper;
+import mrjake.aunis.util.RingMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -72,8 +73,8 @@ private static final String blockName = "transportrings_block";
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
-
-		if (ringsTile.isLinked())
+                RingMap.removeOldAddress(ringsTile, ringsTile.getAddress());
+                if (ringsTile.isLinked())
 			ringsTile.getLinkedControllerTile(world).setLinkedRings(null);
 		
 		ringsTile.removeAllRings();

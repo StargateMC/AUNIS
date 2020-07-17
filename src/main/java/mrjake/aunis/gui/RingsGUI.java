@@ -40,8 +40,8 @@ public class RingsGUI extends GuiBase {
 	public void initGui() {	
 		super.initGui();
 		
-		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
-		textFields.add(addressTextField);
+//		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
+//		textFields.add(addressTextField);
 		
 		nameTextField = createTextField(50, 35, 16, state.getName());
 		textFields.add(nameTextField);
