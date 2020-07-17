@@ -40,7 +40,7 @@ public class RingsGUI extends GuiBase {
 	public void initGui() {	
 		super.initGui();
 		
-//		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
+		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
 //		textFields.add(addressTextField);
 		
 		nameTextField = createTextField(50, 35, 64, state.getName());
@@ -70,7 +70,7 @@ public class RingsGUI extends GuiBase {
 			drawVerticallCenteredString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_not_in_grid"), 0, 0, 0xB36262);
 		}	
 		
-		drawString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_address") + ": ", 0, 20, 0x00AA00);
+		//drawString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_address") + ": ", 0, 20, 0x00AA00);
 		drawString(Aunis.proxy.localize("tile.aunis.transportrings_block.rings_name") + ": ", 0, 35, 0x00AAAA);
 //		this.addressTextField.drawTextBox();
 		

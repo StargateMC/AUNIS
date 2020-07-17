@@ -95,7 +95,7 @@ public class RingMap extends WorldSavedData {
         } else {
             Spawn s = SpawnData.getNearestSpawn(SpawnData.getSpawns(), props);
             if (w.provider.getDimension() == -2) {
-                SpaceStationObject object = SpaceObjectManager.getSpaceManager().getSpaceStationFromBlockCoords(pos);
+                SpaceStationObject object = (SpaceStationObject)SpaceObjectManager.getSpaceManager().getSpaceStationFromBlockCoords(pos);
                 return "Orbiting " + props.getName() + "(" + (object.getId() == s.getIdentifier() && s.getType().equals(SpawnType.Station) ? s.getName() : "Station: " + object.getId()) + ")";
             } else {
                 Random r = new Random();
@@ -127,7 +127,7 @@ public class RingMap extends WorldSavedData {
                     ringsTilesInRange.add(srae.getRings());
                 }
 		
-		rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().world, rae.getRings().getPos()));
+		rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().getWorld(), rae.getRings().getPos()));
 		rae.getRings().getRings().setAddress(count++);
 		
 		for (TransportRingsTile newRingsTile : ringsTilesInRange) {
