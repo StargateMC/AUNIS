@@ -68,16 +68,20 @@ public class RingMap extends WorldSavedData {
     public HashMap<Integer,ArrayList<RingAddressEntry>> getRingsForAddressByFrequencyInstanced(String address) {
         HashMap<Integer,ArrayList<RingAddressEntry>> map = new HashMap<Integer,ArrayList<RingAddressEntry>>();
         if (addressToEntries.get(address) == null || addressToEntries.get(address).isEmpty()) return map;
-        for (RingAddressEntry entry : addressToEntries.get(address)) {
-            if (map.containsKey(entry.getFrequency())) {
-                ArrayList<RingAddressEntry> entries = map.get(entry.getFrequency());
-                entries.add(entry);
-                map.replace(entry.getFrequency(), entries);
-            } else {
-                ArrayList<RingAddressEntry> entries = new ArrayList<RingAddressEntry>();
-                entries.add(entry);
-                map.put(entry.getFrequency(), entries);
+        int count = 0;
+        while (count < addressToEntries.get(address).size()) {
+            RingAddressEntry re = getEntryForIndex(address,count);
+            if (re != null) { 
+                if (map.containsKey(re.getFrequency())) {
+                    ArrayList<RingAddressEntry> entries = map.get(re.getFrequency());
+                    entries.add(re);
+                    map.replace(re.getFrequency(), entries);
+                } else {
+                    ArrayList<RingAddressEntry> entries = new ArrayList<RingAddressEntry>();
+                    entries.add(re);
+                    map.put(re.getFrequency(), entries);
             }
+            count++;
         }
         return map;
     }
@@ -210,7 +214,31 @@ public class RingMap extends WorldSavedData {
             markDirty();
         }
     }
-    
+    public RingAddressEntry getEntryForIndex(String address, int index) {
+        if (address == null) return null;
+        if (getNumFor(address) == 0) return null;
+        if (addressToEntries.get(address).get(index) == null) {
+            //System.out.println("Found null address entry for : " + address + ", index: " + index);
+            return null;
+        }
+        try {
+            World w = CoreAPI.getWorldForDimension(addressToEntries.get(address).get(index).getDimension());
+            if (w != null) {
+                System.out.println("Found world : " + w.provider.getDimension());
+            } else {
+                System.out.println("Couldnt find dimension: " + addressToEntries.get(address).get(index).getDimension());
+            }
+            TransportRingsTile te = addressToEntries.get(address).get(index).getRings();
+            if (te != null && te instanceof TransportRingsTile && DimensionManager.getEffectiveDimId(te.getWorld(), te.getPos()).getName().equals(address)) return addressToEntries.get(address).get(index);
+        } catch (Exception e) {
+            System.out.println("Failed to locate gate: " + e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println("Removing invalid ring " + index + " from RingMap for address : " + address);
+        addressToEntries.get(address).remove(index);
+        markDirty();
+        return null;
+    }
     public TransportRingsTile getForIndex(String address, int index) {
         if (address == null) return null;
         if (getNumFor(address) == 0) return null;
