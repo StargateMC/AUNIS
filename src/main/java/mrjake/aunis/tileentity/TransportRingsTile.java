@@ -134,6 +134,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			globalTeleportBox = LOCAL_TELEPORT_BOX.offset(pos);
+                        this.setBusy(false);
 		}
 		else {
 			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
