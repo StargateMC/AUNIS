@@ -59,6 +59,7 @@ public class RingMap extends WorldSavedData {
     }
     public HashMap<Integer,ArrayList<RingAddressEntry>> getRingsForAddressByFrequencyInstanced(String address) {
         HashMap<Integer,ArrayList<RingAddressEntry>> map = new HashMap<Integer,ArrayList<RingAddressEntry>>();
+        if (addressToEntries.get(address) == null || addressToEntries.get(address).isEmpty()) return map;
         for (RingAddressEntry entry : addressToEntries.get(address)) {
             if (map.containsKey(entry.getFrequency())) {
                 ArrayList<RingAddressEntry> entries = map.get(entry.getFrequency());
