@@ -40,6 +40,7 @@ import mrjake.aunis.transportrings.TransportResult;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
+import mrjake.aunis.util.RingMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -57,6 +58,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import noppes.npcs.entity.EntityCustomNpc;
+import zmaster587.advancedRocketry.dimension.DimensionManager;
+import zmaster587.advancedRocketry.dimension.DimensionProperties;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
 public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment {
@@ -74,14 +77,53 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	private AunisAxisAlignedBB globalTeleportBox;
 	
 	private List<Entity> teleportList = new ArrayList<>();
-	
+        private int frequency;
+        private String address = null;
+        
+        public String changeCharInPosition(int position, char ch, String str){
+          char[] charArray = str.toCharArray();
+          charArray[position] = ch;
+          return new String(charArray);
+        }
+        
+        public String getResolvedAddress() {
+            DimensionProperties props = DimensionManager.getEffectiveDimId(this.world, this.getPos());
+            if (props == null || props == DimensionManager.defaultSpaceDimensionProperties) {
+                return null;
+            } else {
+                return changeCharInPosition(6,Integer.toString(0).charAt(0),props.getName());
+            }
+        }
 	@Override
 	public void update() {		
 		if (!world.isRemote) {
 			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+                        if (address != null && getResolvedAddress() == null) {
+                            System.out.println("Removing old address: " + address + " from ring due to rings moving!");
+                            RingMap.removeOldAddress(this, address);
+                        }
+                        if (address == null && getResolvedAddress() != null) {
+                            System.out.println("Adding address: " + address + " to ring!");
+                            RingMap.addOrUpdateEntryFor(this, getResolvedAddress());
+                        }
 		}
 	}
 	
+        public int getFrequency() {
+            return this.frequency;
+        }
+        
+        public void setFrequency(int freq) {
+            this.frequency = freq;
+        }
+        
+        public String getAddress() {
+            return this.address;
+        }
+        public void setAddress(String address) {
+            this.address = address;
+        }
+        
 	@Override
 	public void onLoad() {
 		
@@ -91,7 +133,6 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			Aunis.ocWrapper.joinOrCreateNetwork(this);
 			globalTeleportBox = LOCAL_TELEPORT_BOX.offset(pos);
 		}
-		
 		else {
 			renderer = new TransportRingsRenderer(world, LOCAL_TELEPORT_BOX);
 			AunisPacketHandler.INSTANCE.sendToServer(new StateUpdateRequestToServer(pos, StateTypeEnum.RENDERER_STATE));
@@ -147,7 +188,6 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
                                         if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
 					if (!excludedEntities.contains(entity)) {
 						BlockPos ePos = entity.getPosition().add(teleportVector);		
-						
 						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
 					}
 				}
@@ -223,6 +263,10 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	 * @param address Target rings address
 	 */
 	public TransportResult attemptTransportTo(int address, int waitTime) {
+                
+                if (this.getAddress() == null || this.frequency == -1)
+                    return TransportResult.NOT_LINKED;
+                
 		if (checkIfObstructed()) {
 			return TransportResult.OBSTRUCTED;
 		}
@@ -237,7 +281,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		if (rings != null) {
 			BlockPos targetRingsPos = rings.getPos();
 			TransportRingsTile targetRingsTile = (TransportRingsTile) world.getTileEntity(targetRingsPos);
-			
+                        
+			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency()) {
+				return TransportResult.NO_SUCH_ADDRESS;
+			}
+                        
 			if (targetRingsTile.checkIfObstructed()) {
 				return TransportResult.OBSTRUCTED_TARGET;
 			}
@@ -343,9 +391,9 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// ---------------------------------------------------------------------------------
 	// Rings network
 	private TransportRings rings;
-	private TransportRings getRings() {
+	public TransportRings getRings() {
 		if (rings == null)
-			rings = new TransportRings(pos);
+			rings = new TransportRings(pos,world.provider.getDimension());
 		
 		return rings;
 	}
@@ -357,8 +405,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	 * @param callerPos - calling tile position
 	 * @return - clone of this rings info
 	 */
-	public TransportRings getClonedRings(BlockPos callerPos) {
-		return getRings().cloneWithNewDistance(callerPos);
+	public TransportRings getClonedRings(BlockPos callerPos, int dimension) {
+		return getRings().cloneWithNewDistance(callerPos, dimension);
 	}
 	
 	/**
@@ -373,7 +421,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	 * @param caller - Caller rings tile
 	 */
 	public void addRings(TransportRingsTile caller) {
-		TransportRings clonedRings = caller.getClonedRings(this.pos);
+		TransportRings clonedRings = caller.getClonedRings(this.pos, this.world.provider.getDimension());
 		
 		if (clonedRings.isInGrid()) {
 			ringsMap.put(clonedRings.getAddress(), clonedRings);
@@ -412,7 +460,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				TransportRingsTile newRingsTile = (TransportRingsTile) world.getTileEntity(newRingsPos);	
 				ringsTilesInRange.add(newRingsTile);
 
-				int newRingsAddress = newRingsTile.getClonedRings(pos).getAddress();
+				int newRingsAddress = newRingsTile.getClonedRings(pos,newRingsTile.world.provider.getDimension()).getAddress();
 				if (newRingsAddress == address && newRingsAddress != -1) {					
 					return ParamsSetResult.DUPLICATE_ADDRESS;
 				}
@@ -451,6 +499,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			compound.setLong("linkedController", linkedController.toLong());
 		
 		compound.setInteger("ringsMapLength", ringsMap.size());
+		compound.setInteger("frequency", frequency);
+		if (this.address != null) compound.setString("address", address);
 		
 		int i = 0;
 		for (TransportRings rings : ringsMap.values()) {
@@ -489,7 +539,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		try {
 			rendererState.deserializeNBT(compound.getCompoundTag("rendererState"));
 			ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
-			
+			if (compound.hasKey("frequency")) this.frequency = compound.getInteger("frequency");
+			if (compound.hasKey("address")) this.address = compound.getString("address");
 			teleportList = new ArrayList<>();
 			int size = compound.getInteger("teleportListSize");
 			for (int j=0; j<size; j++)
@@ -767,4 +818,5 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		return new Object[] { attemptTransportTo(address, 0) };
 	}
+
 }

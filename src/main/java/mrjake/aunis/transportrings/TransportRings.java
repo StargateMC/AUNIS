@@ -20,7 +20,9 @@ public class TransportRings {
 	private int address;
 	public int getAddress() { return address; }
 	public void setAddress(int address) { this.address = address; }
-	
+	private int dimension = 0;
+        public int getDimension() { return dimension; }
+        
 	/**
 	 * Rings display name
 	 */
@@ -60,8 +62,8 @@ public class TransportRings {
 	 * 
 	 * @param pos - mandatory, points to rings base block
 	 */
-	public TransportRings(BlockPos pos) {		
-		this(-1, null, pos, false);
+	public TransportRings(BlockPos pos, int dimension) {		
+		this(-1, null, pos, false, dimension);
 	}
 	
 	/**
@@ -71,7 +73,7 @@ public class TransportRings {
 	 * @param name
 	 */
 	public TransportRings(int address, String name) {		
-		this(address, name, new BlockPos(0,0,0), false);
+		this(address, name, new BlockPos(0,0,0), false, 0);
 	}
 	
 	/**
@@ -85,20 +87,20 @@ public class TransportRings {
 	/**
 	 * Called internally
 	 */
-	private TransportRings(int address, String name, BlockPos pos, boolean isClone) {
+	private TransportRings(int address, String name, BlockPos pos, boolean isClone, int dimension) {
 		this.address = address;
 		this.name = name;
 		this.pos = pos;
-		
 		this.isClone = isClone;
+                this.dimension = dimension;
 	}
 	
 	/**
 	 * Returns new instance of this object with specified distance to the
 	 * rings requiring the clone
 	 */
-	public TransportRings cloneWithNewDistance(BlockPos callerPos) {
-		return new TransportRings(address, name, pos, true).setDistanceTo(callerPos);
+	public TransportRings cloneWithNewDistance(BlockPos callerPos, int callerDimension) {
+		return new TransportRings(address, name, pos, true, callerDimension).setDistanceTo(callerPos);
 	}
 	
 	/**
@@ -140,6 +142,8 @@ public class TransportRings {
 		
 		if (isClone)
 			compound.setDouble("distance", distance);
+		if (dimension != 0)
+			compound.setDouble("dimension", dimension);
 		
 		return compound;
 	}
@@ -152,6 +156,9 @@ public class TransportRings {
 		
 		if (compound.hasKey("name"))
 			name = compound.getString("name");
+                
+		if (compound.hasKey("dimension"))
+			dimension = compound.getInteger("dimension");
 		
 		pos = BlockPos.fromLong(compound.getLong("pos"));
 		
