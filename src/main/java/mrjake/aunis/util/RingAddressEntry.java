@@ -4,8 +4,11 @@
  * and open the template in the editor.
  */
 package mrjake.aunis.util;
+import com.stargatemc.api.CoreAPI;
+import com.stargatemc.constants.ConsoleMessageType;
 import mrjake.aunis.tileentity.TransportRingsTile;
 import net.minecraft.nbt.*;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 /**
  *
@@ -60,7 +63,18 @@ public class RingAddressEntry {
     }
     
     public TransportRingsTile getRings() {
-        return null;
+        try {
+            TileEntity te = CoreAPI.getWorldForDimension(this.dimension).getTileEntity(this.getBlockPos());
+            if (te != null && te instanceof TransportRingsTile) {
+                return (TransportRingsTile)te;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            CoreAPI.sendConsoleEntry("Failed to locate rings at : " + this.dimension + ", " + this.getBlockPos().toString(), ConsoleMessageType.FINE);
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public String getAddress() {
