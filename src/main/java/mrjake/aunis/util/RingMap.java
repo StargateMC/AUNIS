@@ -80,6 +80,7 @@ public class RingMap extends WorldSavedData {
                     ArrayList<RingAddressEntry> entries = new ArrayList<RingAddressEntry>();
                     entries.add(re);
                     map.put(re.getFrequency(), entries);
+                }
             }
             count++;
         }
