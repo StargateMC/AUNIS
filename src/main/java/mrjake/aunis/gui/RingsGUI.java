@@ -62,7 +62,7 @@ public class RingsGUI extends GuiBase {
 		drawBackground();
 
 		if (state.isInGrid()) {
-			drawVerticallCenteredString(new TextComponentTranslation("tile.aunis.transportrings_block.rings_no", state.getAddress()).getFormattedText(), 0, 0, 0xAA5500);
+			//drawVerticallCenteredString(new TextComponentTranslation("tile.aunis.transportrings_block.rings_no", state.getAddress()).getFormattedText(), 0, 0, 0xAA5500);
 //			drawText("Connected to:", 0, 13, color(88, 97, 115, 255));
 		}
 		

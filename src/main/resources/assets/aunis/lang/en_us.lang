@@ -1,4 +1,4 @@
-itemGroup.aunis=Aunis
+﻿itemGroup.aunis=Aunis
 soundCategory.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Ancient Analyzer
@@ -90,7 +90,7 @@ tile.aunis.transportrings_block.obstructed_target=Target rings obstructed, clear
 tile.aunis.transportrings_block.busy=Rings busy
 tile.aunis.transportrings_block.busy_target=Target rings busy
 tile.aunis.transportrings_block.rings_no=Rings No. %s
-tile.aunis.transportrings_block.rings_not_in_grid=Rings not in grid
+tile.aunis.transportrings_block.rings_not_in_grid=Rings not connected to network
 tile.aunis.transportrings_block.rings_address=Address
 tile.aunis.transportrings_block.rings_name=Name
 tile.aunis.transportrings_block.rings_save=Save

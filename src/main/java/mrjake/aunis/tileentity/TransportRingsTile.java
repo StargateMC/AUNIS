@@ -1,6 +1,7 @@
 package mrjake.aunis.tileentity;
 
 import com.stargatemc.api.CoreAPI;
+import gcewing.sg.util.FakeTeleporter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -190,8 +191,16 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				for (Entity entity : teleportList) {
                                         if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
 					if (!excludedEntities.contains(entity)) {
-						BlockPos ePos = entity.getPosition().add(teleportVector);		
-                                                if (entity instanceof EntityPlayer) CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
+						BlockPos ePos = entity.getPosition().add(teleportVector);	
+                                                if (targetDimension != this.world.provider.getDimension()) {
+                                                    if (entity instanceof EntityPlayer) {
+                                                        CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
+                                                    } else {
+                                                        FakeTeleporter fakeTeleporter = new FakeTeleporter();
+                                                        entity = entity.changeDimension(targetDimension, fakeTeleporter);
+                                                    }
+                                                }
+                                                
 						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
 					}
 				}
