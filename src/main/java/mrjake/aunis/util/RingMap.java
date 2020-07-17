@@ -79,10 +79,12 @@ public class RingMap extends WorldSavedData {
 //    }
 //    
     public void updateRings(String address, int frequency) {
+        if (this.getRingsForFrequencyInstanced(address, frequency) == null || this.getRingsForFrequencyInstanced(address, frequency).isEmpty()) return;
         int count = 0;
 		try {
                     for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
-                                rae.getRings().removeAllRings();
+                                TransportRingsTile trt = rae.getRings();
+                                trt.ringsMap.clear();
                     }
                 } catch (Exception e) {
                     System.out.println("Failed to clear rings for address: " + address + " and freq: " + frequency);

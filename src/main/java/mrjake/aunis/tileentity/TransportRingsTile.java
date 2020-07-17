@@ -275,7 +275,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			return TransportResult.BUSY;
 		}
 		
-		TransportRings rings = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address).getRings().getRings();
+		TransportRings rings = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings().getRings();
                 		
 		// Binding exists
 		if (rings != null) {
