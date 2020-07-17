@@ -56,6 +56,14 @@ public class RingMap extends WorldSavedData {
         return BaseUtils.getWorldData(world, RingMap.class, "stargatemc-ring_map");
     }
     
+    public static RingAddressEntry getForTileEntity(TransportRingsTile tile) {
+        if (tile.getAddress() == null) return null;
+        for (RingAddressEntry rae : getRingsForFrequency(tile.getAddress(),tile.getFrequency())) {
+            if (rae.getRings().equals(tile)) return rae;
+        }
+        return null;
+    }
+    
     public static ArrayList<RingAddressEntry> getRingsForFrequency(String address, int frequency) {
         return get().getRingsForFrequencyInstanced(address, frequency);
     }
@@ -65,6 +73,21 @@ public class RingMap extends WorldSavedData {
     public static HashMap<Integer,ArrayList<RingAddressEntry>> getRingsForAddressByFrequency(String address) {
         return get().getRingsForAddressByFrequencyInstanced(address);
     }
+    
+    public static int availableSlots(String address, int frequency) {
+        return 6 - getRingsForFrequency(address,frequency).size();
+    }
+    
+    public boolean updateFrequency(RingAddressEntry entry, int newFrequency) {
+        if (availableSlots(entry.getAddress(), newFrequency) < 1) return false;
+        int oldFrequency = entry.getFrequency();
+        entry.setFrequency(newFrequency);
+        markDirty();
+        updateRings(entry.getAddress(),oldFrequency);
+        updateRings(entry.getAddress(),entry.getFrequency());
+        return true;
+    }
+    
     public HashMap<Integer,ArrayList<RingAddressEntry>> getRingsForAddressByFrequencyInstanced(String address) {
         HashMap<Integer,ArrayList<RingAddressEntry>> map = new HashMap<Integer,ArrayList<RingAddressEntry>>();
         if (addressToEntries.get(address) == null || addressToEntries.get(address).isEmpty()) return map;
@@ -230,7 +253,7 @@ public class RingMap extends WorldSavedData {
                 System.out.println("Couldnt find dimension: " + addressToEntries.get(address).get(index).getDimension());
             }
             TransportRingsTile te = addressToEntries.get(address).get(index).getRings();
-            if (te != null && te instanceof TransportRingsTile && DimensionManager.getEffectiveDimId(te.getWorld(), te.getPos()).getName().equals(address)) return addressToEntries.get(address).get(index);
+            if (te != null && te instanceof TransportRingsTile && te.getResolvedAddress().equals(address)) return addressToEntries.get(address).get(index);
         } catch (Exception e) {
             System.out.println("Failed to locate gate: " + e.getMessage());
             e.printStackTrace();

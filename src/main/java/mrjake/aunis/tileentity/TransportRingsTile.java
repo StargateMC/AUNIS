@@ -43,6 +43,7 @@ import mrjake.aunis.transportrings.TransportResult;
 import mrjake.aunis.transportrings.TransportRings;
 import mrjake.aunis.util.AunisAxisAlignedBB;
 import mrjake.aunis.util.ILinkable;
+import mrjake.aunis.util.RingAddressEntry;
 import mrjake.aunis.util.RingMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -761,7 +762,29 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		return new Object[] { rings.getName() };
 	}
-	
+        
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] getFrequency(Context context, Arguments args) {
+		
+		return new Object[] { this.getFrequency() };
+	}
+        
+	@Optional.Method(modid = "opencomputers")
+	@Callback
+	public Object[] setFrequency(Context context, Arguments args) {
+		
+		int freq = args.checkInteger(0);
+		
+		if (this.getFrequency() < 1)
+			throw new IllegalArgumentException("bad argument #1 (frequency out of range, allowed <0+>)");
+		RingAddressEntry entry = RingMap.getForTileEntity(this);
+                if (RingMap.availableSlots(this.getAddress(), freq) < 1)
+			throw new IllegalArgumentException("bad argument #1 (frequency allocation exhausted)");
+                
+		return new Object[] { RingMap.get().updateFrequency(entry, freq) };
+	}
+        
 	@Optional.Method(modid = "opencomputers")
 	@Callback
 	public Object[] setAddress(Context context, Arguments args) {
