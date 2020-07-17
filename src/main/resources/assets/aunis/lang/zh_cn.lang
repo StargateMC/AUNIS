@@ -1,4 +1,4 @@
-itemGroup.aunis=奥尼斯
+﻿itemGroup.aunis=奥尼斯
 
 item.aunis.analyzer_ancient.name=古人的分析仪
 item.aunis.crystal_control_dhd.name=DHD控制水晶
@@ -23,6 +23,7 @@ tile.aunis.stargate_milkyway_chevron_block.name=银河系星门标记方块
 tile.aunis.dhd_block.name=拨号回家装置(DHD)
 tile.aunis.capacitor_block.name=电容储存器
 
+tile.aunis.transportrings_block.not_linked_to_network=No other rings detected
 tile.aunis.stargate_orlin_base_block.name=人造迷你星门基础方块
 tile.aunis.stargate_orlin_member_block.name=人造迷你星门环方块
 

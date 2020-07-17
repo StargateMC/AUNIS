@@ -1,4 +1,4 @@
-itemGroup.aunis=Aunis
+﻿itemGroup.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Анализатор Древних
 item.aunis.crystal_control_dhd.name=Контрольный Кристалл Наборного Устройства
@@ -24,6 +24,7 @@ tile.aunis.stargate_milkyway_chevron_block.name=Шеврон Звёздных В
 tile.aunis.dhd_block.name=Наборное Устройство
 tile.aunis.capacitor_block.name=Конденсатор
 tile.aunis.capacitor_block_empty.name=Конденсатор (Пустой)
+tile.aunis.transportrings_block.not_linked_to_network=No other rings detected
 
 tile.aunis.stargate_orlin_base_block.name=Основание Звёздных Врат (Орлин)
 tile.aunis.stargate_orlin_member_block.name=Кольцо Звёздных Врат (Орлин)

@@ -1,4 +1,4 @@
-itemGroup.aunis=Aunis
+﻿itemGroup.aunis=Aunis
 soundCategory.aunis=Aunis
 
 item.aunis.analyzer_ancient.name=Analyseur Ancien
@@ -41,6 +41,7 @@ item.aunis.crystal_red.name=Cristal de puissance
 item.aunis.crystal_ender.name=Cristal du Néant
 item.aunis.crystal_yellow.name=Cristal lumineux
 item.aunis.crystal_white.name=Cristal blanc
+tile.aunis.transportrings_block.not_linked_to_network=No other rings detected
 
 item.aunis.circuit_control_base.name=Base du circuit de contrôle
 item.aunis.circuit_control_naquadah.name=Circuit de contrôle de Naquadah 
