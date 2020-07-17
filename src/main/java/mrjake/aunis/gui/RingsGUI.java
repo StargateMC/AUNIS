@@ -43,7 +43,7 @@ public class RingsGUI extends GuiBase {
 //		addressTextField = createTextField(50, 20, 1, state.isInGrid() ? "" + state.getAddress() : "");
 //		textFields.add(addressTextField);
 		
-		nameTextField = createTextField(50, 35, 16, state.getName());
+		nameTextField = createTextField(50, 35, 64, state.getName());
 		textFields.add(nameTextField);
 		
 		saveButton = new AunisGuiButton(id++, getBottomRightInside(false)-90, getBottomRightInside(true)-20, 90, 20, Aunis.proxy.localize("tile.aunis.transportrings_block.rings_save"));

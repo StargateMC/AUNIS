@@ -7,7 +7,10 @@ package mrjake.aunis.util;
 
 import java.util.*;
 import com.stargatemc.api.CoreAPI;
+import com.stargatemc.constants.SpawnType;
 import com.stargatemc.data.LocationData;
+import com.stargatemc.data.Spawn;
+import com.stargatemc.data.SpawnData;
 
 import gcewing.sg.BaseUtils;
 import mrjake.aunis.tileentity.TransportRingsTile;
@@ -16,10 +19,15 @@ import net.minecraft.world.*;
 import net.minecraft.world.storage.*;
 import net.minecraftforge.common.util.Constants;
 import zmaster587.advancedRocketry.dimension.DimensionManager;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
+import net.minecraft.world.World;
 //import net.minecraftforge.common.*;
 
 import net.minecraft.util.math.BlockPos;
 import zmaster587.advancedRocketry.dimension.DimensionProperties;
+import zmaster587.advancedRocketry.stations.SpaceObjectManager;
+import zmaster587.advancedRocketry.stations.SpaceStationObject;
 
 public class RingMap extends WorldSavedData {
 
@@ -78,6 +86,28 @@ public class RingMap extends WorldSavedData {
 //        return RingMap.get().getNearestRing(w, pos);
 //    }
 //    
+    
+    public String getRingsNameForBlockPos(World w, BlockPos pos) {
+        DimensionProperties props = DimensionManager.getEffectiveDimId(w, pos);
+        
+        if (props == null || props == DimensionManager.defaultSpaceDimensionProperties) {
+            return "In FTL";
+        } else {
+            Spawn s = SpawnData.getNearestSpawn(SpawnData.getSpawns(), props);
+            if (w.provider.getDimension() == -2) {
+                SpaceStationObject object = SpaceObjectManager.getSpaceManager().getSpaceStationFromBlockCoords(pos);
+                return "Orbiting " + props.getName() + "(" + (object.getId() == s.getIdentifier() && s.getType().equals(SpawnType.Station) ? s.getName() : "Station: " + object.getId()) + ")";
+            } else {
+                Random r = new Random();
+                int randomX = r.nextInt(256);
+                int randomZ = r.nextInt(256);
+                if (r.nextBoolean()) randomX *= -1;
+                if (r.nextBoolean()) randomZ *= -1;
+                if (LocationData.isPositionProtected(w,pos) && props.getId() == s.getIdentifier() && s.getType().equals(SpawnType.Planet)) return s.getName();
+                return (props.getName() + "(Near " + (pos.getX() + randomX) + "," + (pos.getZ() + randomZ) + ")");
+            }
+        }
+    }
     public void updateRings(String address, int frequency) {
         if (this.getRingsForFrequencyInstanced(address, frequency) == null || this.getRingsForFrequencyInstanced(address, frequency).isEmpty()) return;
         int count = 0;
@@ -97,7 +127,7 @@ public class RingMap extends WorldSavedData {
                     ringsTilesInRange.add(srae.getRings());
                 }
 		
-		rae.getRings().getRings().setName("Ring" + count);
+		rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().world, rae.getRings().getPos()));
 		rae.getRings().getRings().setAddress(count++);
 		
 		for (TransportRingsTile newRingsTile : ringsTilesInRange) {
