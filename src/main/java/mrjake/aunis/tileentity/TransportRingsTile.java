@@ -71,7 +71,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	// ---------------------------------------------------------------------------------
 	// Ticking and loading
 	
-	public static final int FADE_OUT_TOTAL_TIME = 2 * 20; // 2s
+	public static final int FADE_OUT_TOTAL_TIME = 2 * 120; // 2s
 	public static final int TIMEOUT_TELEPORT = FADE_OUT_TOTAL_TIME/2;
 
 	public static final int TIMEOUT_FADE_OUT = (int) (30 + TransportRingsRenderer.INTERVAL_UPRISING*TransportRingsRenderer.RING_COUNT + TransportRingsRenderer.ANIMATION_SPEED_DIVISOR * Math.PI);	
@@ -315,6 +315,10 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 				return TransportResult.BUSY_TARGET;
 			}
 			
+                        if (targetRingsTile.equals(this)) {
+                            return TransportResult.DIAL_SELF_FAIL;
+                        }
+                        
 			this.setBusy(true);
 			targetRingsTile.setBusy(true);
 			
