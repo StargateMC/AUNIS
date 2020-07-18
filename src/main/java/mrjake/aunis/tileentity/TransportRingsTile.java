@@ -465,7 +465,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		for (TransportRings rings : ringsMap.values()) {
 			
 			TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(rings.getPos());
-			ringsTile.removeRings(getRings().getAddress());
+			if (ringsTile != null) ringsTile.removeRings(getRings().getAddress());
 		}
 	}
 	
