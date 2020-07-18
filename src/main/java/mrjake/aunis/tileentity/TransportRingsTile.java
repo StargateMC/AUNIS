@@ -92,7 +92,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
         
         public String getResolvedAddress() {
             DimensionProperties props = DimensionManager.getEffectiveDimId(this.world, this.getPos());
-            if (props == null || props == DimensionManager.defaultSpaceDimensionProperties) {
+            if (props == null || props == DimensionManager.defaultSpaceDimensionProperties || props.getId() == 0)  {
                 return null;
             } else {
                 return changeCharInPosition(6,Integer.toString(0).charAt(0),props.getName());

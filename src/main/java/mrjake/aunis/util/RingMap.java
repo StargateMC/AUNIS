@@ -7,6 +7,7 @@ package mrjake.aunis.util;
 
 import java.util.*;
 import com.stargatemc.api.CoreAPI;
+import com.stargatemc.constants.ConsoleMessageType;
 import com.stargatemc.constants.SpawnType;
 import com.stargatemc.data.LocationData;
 import com.stargatemc.data.Spawn;
@@ -122,6 +123,7 @@ public class RingMap extends WorldSavedData {
             return "In FTL";
         } else {
             Spawn s = SpawnData.getNearestSpawn(SpawnData.getSpawns(), props);
+            if (s == null) return "Unknown";
             if (w.provider.getDimension() == -2) {
                 SpaceStationObject object = (SpaceStationObject)SpaceObjectManager.getSpaceManager().getSpaceStationFromBlockCoords(pos);
                 return "Orbiting " + props.getName() + "(" + (object.getId() == s.getIdentifier() && s.getType().equals(SpawnType.Station) ? s.getName() : "Station: " + object.getId()) + ")";
@@ -362,11 +364,18 @@ public class RingMap extends WorldSavedData {
         RingMap.get().addOrUpdateFor(te,address);
     }
     public void addOrUpdateFor(TransportRingsTile te, String address) {
+        if (address != null) {
         RingAddressEntry entry = new RingAddressEntry(te,address);
         te.setAddress(address);
         te.setFrequency(this.getAvailableFrequencyInstanced(address));
         addOrUpdateFor(entry);
         updateRings(address,te.getFrequency());
+        CoreAPI.sendConsoleEntry("Added address " + te.getAddress() + " and frequency: " + te.getFrequency() +  " for : " + te.getWorld().provider.getDimension() + ", pos: " + te.getPos().toString(), ConsoleMessageType.FINE);
+        } else {
+            te.setAddress(null);
+            te.setFrequency(-1);
+            CoreAPI.sendConsoleEntry("Failed to add address for : " + te.getWorld().provider.getDimension() + ", pos: " + te.getPos().toString(), ConsoleMessageType.FINE);
+        }
     }
     
     @Override
