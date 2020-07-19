@@ -303,7 +303,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			BlockPos targetRingsPos = rings.getPos();
 			TransportRingsTile targetRingsTile = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings();
                         
-			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency()) {
+			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency() || targateRingsTile.world.provider.getDimension() == 0) {
 				return TransportResult.NO_SUCH_ADDRESS;
 			}
                         
