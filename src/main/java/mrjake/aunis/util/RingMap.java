@@ -152,20 +152,24 @@ public class RingMap extends WorldSavedData {
                 }
         try {
             for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
-        	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
+            	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
                 for (RingAddressEntry srae : this.getRingsForFrequencyInstanced(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
-                    ringsTilesInRange.add(srae.getRings());
+                    try {
+                    	ringsTilesInRange.add(srae.getRings());
+                    } catch (Exception e) {
+                    	e.printStackTrace();
+                        System.out.println("Failed to consider rings for address: " + srae.getAddress() + " on dim: " + srae.getDimension() + " at position: " + srae.getBlockPos().toString() + " and freq: " + frequency);
+                    }
                 }
-		
-		rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().getWorld(), rae.getRings().getPos()));
-		rae.getRings().getRings().setAddress(count++);
-		
-		for (TransportRingsTile newRingsTile : ringsTilesInRange) {
-			rae.getRings().addRings(newRingsTile);
-			newRingsTile.addRings(rae.getRings());
-		}
-		
-		rae.getRings().markDirty();
+				rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().getWorld(), rae.getRings().getPos()));
+				rae.getRings().getRings().setAddress(count++);
+				
+				for (TransportRingsTile newRingsTile : ringsTilesInRange) {
+					rae.getRings().addRings(newRingsTile);
+					newRingsTile.addRings(rae.getRings());
+				}
+				
+				rae.getRings().markDirty();
         }
         } catch (Exception e) {
                     System.out.println("Failed to update rings for address: " + address + " and freq: " + frequency);
