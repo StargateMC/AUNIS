@@ -1,5 +1,5 @@
 package mrjake.aunis.tileentity;
-
+import net.minecraft.util.EnumFacing;
 import com.stargatemc.api.CoreAPI;
 import gcewing.sg.util.FakeTeleporter;
 import java.util.ArrayList;
@@ -7,7 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import ic2.api.energy.tile.IEnergyEmitter;
+import ic2.api.energy.EnergyNet;
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
+import net.minecraftforge.common.MinecraftForge;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -64,12 +68,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import noppes.npcs.entity.EntityCustomNpc;
 import zmaster587.advancedRocketry.dimension.DimensionManager;
 import zmaster587.advancedRocketry.dimension.DimensionProperties;
+import ic2.api.energy.tile.IEnergySink;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
-public class TransportRingsTile extends TileEntity implements ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment {
+public class TransportRingsTile extends TileEntity implements IEnergySink, ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment {
 	
 	// ---------------------------------------------------------------------------------
 	// Ticking and loading
+    private boolean loaded = false;
+    private int maxSafeInput = 32768;
+    private int powerTier = 6;
+    private double energyBuffer = 0;
+    private int update = 0;
+    private double energyMax = 10000000;
 	
 	public static final int FADE_OUT_TOTAL_TIME = 2 * 120; // 2s
 	public static final int TIMEOUT_TELEPORT = FADE_OUT_TOTAL_TIME/2;
@@ -98,10 +109,22 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
                 return changeCharInPosition(6,Integer.toString(0).charAt(0),props.getName());
             }
         }
+        
+        void unload() {
+            if (!world.isRemote && loaded) {
+                MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+                loaded = false;
+            }
+        }
+        
 	@Override
 	public void update() {		
 		if (!world.isRemote) {
 			ScheduledTask.iterate(scheduledTasks, world.getTotalWorldTime());
+						if (!loaded) {
+				            loaded = true;
+				            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+				        }
                         if (address != null && getResolvedAddress() == null) {
                             System.out.println("Removing old address: " + address + " from ring due to rings moving!");
                             RingMap.removeOldAddress(this, address);
@@ -281,7 +304,11 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
                 
                 if (this.getAddress() == null || this.frequency == -1)
                     return TransportResult.NOT_LINKED;
-                
+        
+        if (this.energyBuffer < energyMax) {
+        	return TransportResult.INSUFFICIENT_POWER;
+        }
+        
 		if (checkIfObstructed()) {
 			return TransportResult.OBSTRUCTED;
 		}
@@ -303,7 +330,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			BlockPos targetRingsPos = rings.getPos();
 			TransportRingsTile targetRingsTile = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings();
                         
-			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency() || targateRingsTile.world.provider.getDimension() == 0) {
+			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency()) {
 				return TransportResult.NO_SUCH_ADDRESS;
 			}
                         
@@ -323,6 +350,8 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			targetRingsTile.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
+			this.energyBuffer = 0;
+			markDirty();
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
 			this.targetDimension = targetRingsTile.world.provider.getDimension();
                         startAnimationAndTeleport(targetRingsPos, excludedEntities, waitTime, true);
@@ -547,6 +576,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		compound.setLong("targetRingsPos", targetRingsPos.toLong());
 		compound.setBoolean("busy", isBusy());
+		compound.setDouble("buffer", this.energyBuffer);
 		
 		if (node != null) {
 			NBTTagCompound nodeCompound = new NBTTagCompound();
@@ -567,6 +597,7 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 			ScheduledTask.deserializeList(compound.getCompoundTag("scheduledTasks"), scheduledTasks, this);
 			if (compound.hasKey("frequency")) this.frequency = compound.getInteger("frequency");
 			if (compound.hasKey("address")) this.address = compound.getString("address");
+			if (compound.hasKey("buffer")) this.energyBuffer = compound.getDouble("buffer");
 			teleportList = new ArrayList<>();
 			int size = compound.getInteger("teleportListSize");
 			for (int j=0; j<size; j++)
@@ -705,13 +736,15 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 	public void onChunkUnload() {
 		if (node != null)
 			node.remove();
+		
+		unload();
 	}
 
 	@Override
 	public void invalidate() {
 		if (node != null)
 			node.remove();
-				
+		unload();
 		super.invalidate();
 	}
 	
@@ -866,5 +899,39 @@ public class TransportRingsTile extends TileEntity implements ITickable, Rendere
 		
 		return new Object[] { attemptTransportTo(address, 0) };
 	}
+	
+    //------------------------- IEnergyAcceptor -------------------------
+
+    @Override
+    public boolean acceptsEnergyFrom(IEnergyEmitter emitter, EnumFacing direction) {
+    	if (!direction.equals(EnumFacing.UP)) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+
+    //------------------------- IEnergySink -------------------------
+
+    @Override
+    public double getDemandedEnergy() {
+        double eu = Math.min(energyMax - energyBuffer, maxSafeInput);
+        return eu;
+    }
+
+    @Override
+    public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
+        energyBuffer += amount;
+        if (update++ > 10) { // We dont' need 20 packets per second to the client....
+            markDirty();
+            update = 0;
+        }
+        return 0;
+    }
+
+    @Override
+    public int getSinkTier() {
+        return powerTier;  //HV
+    }
 
 }

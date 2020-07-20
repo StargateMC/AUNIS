@@ -13,7 +13,8 @@ public enum TransportResult {
 	OBSTRUCTED_TARGET(new TextComponentTranslation("tile.aunis.transportrings_block.obstructed_target")),
 	NO_SUCH_ADDRESS(new TextComponentTranslation("tile.aunis.transportrings_block.non_existing_address")), 
         NOT_LINKED(new TextComponentTranslation("tile.aunis.transportrings_block.not_linked_to_network")), 
-        DIAL_SELF_FAIL(new TextComponentTranslation("tile.aunis.transportrings_block.dial_self_fail"));
+        INSUFFICIENT_POWER(new TextComponentTranslation("tile.aunis.transportrings_block.insufficient_power")),
+    DIAL_SELF_FAIL(new TextComponentTranslation("tile.aunis.transportrings_block.dial_self_fail"));
 	
 	@Nullable
 	public TextComponentTranslation textComponent;

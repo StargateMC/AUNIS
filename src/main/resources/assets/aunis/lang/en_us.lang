@@ -85,6 +85,7 @@ tile.aunis.transportrings_block.name=Transport rings
 tile.aunis.transportrings_block.non_existing_address=Unable to reach this address
 tile.aunis.transportrings_block.not_linked_to_network=No other rings detected
 tile.aunis.transportrings_block.dial_self_fail=Rings cant transport to themselves
+tile.aunis.transportrings_block.insufficient_power=Insufficient power to activate rings
 tile.aunis.transportrings_block.duplicate_address=Duplicate address
 tile.aunis.transportrings_block.wrong_address=Cant save name for disconnected ring platform
 tile.aunis.transportrings_block.obstructed=Rings obstructed, clear 5x5 area around rings
