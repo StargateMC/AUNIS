@@ -151,16 +151,16 @@ public class RingMap extends WorldSavedData {
                     e.printStackTrace();
                 }
         try {
-            for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
-            	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
-                for (RingAddressEntry srae : this.getRingsForFrequencyInstanced(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
-                    try {
-                    	ringsTilesInRange.add(srae.getRings());
-                    } catch (Exception e) {
-                    	e.printStackTrace();
-                        System.out.println("Failed to consider rings for address: " + srae.getAddress() + " on dim: " + srae.getDimension() + " at position: " + srae.getBlockPos().toString() + " and freq: " + frequency);
-                    }
+        	List<TransportRingsTile> ringsTilesInRange = new ArrayList<>();
+            for (RingAddressEntry srae : this.getRingsForFrequencyInstanced(rae.getRings().getAddress(), rae.getRings().getFrequency())) {
+                try {
+                	ringsTilesInRange.add(srae.getRings());
+                } catch (Exception e) {
+                	e.printStackTrace();
+                    System.out.println("Failed to consider rings for address: " + srae.getAddress() + " on dim: " + srae.getDimension() + " at position: " + srae.getBlockPos().toString() + " and freq: " + frequency);
                 }
+            }
+            for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
 				rae.getRings().getRings().setName(getRingsNameForBlockPos(rae.getRings().getWorld(), rae.getRings().getPos()));
 				rae.getRings().getRings().setAddress(count++);
 				
