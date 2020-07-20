@@ -33,11 +33,11 @@ public class TRControllerTile extends TileEntity implements ILinkable, RendererP
 	}
 	
 	public boolean isLinked() {
-		return linkedRings != null;
+		return (linkedRings != null && world.getTileEntity(linkedRings) != null && world.getTileEntity(linkedRings) instanceof TransportRingsTile && ((TransportRingsTile) world.getTileEntity(linkedRings)).getLinkedController().equals(this.getPos()));
 	}
 	
 	public TransportRingsTile getLinkedRingsTile(World world) {
-		return (linkedRings != null ? ((TransportRingsTile) world.getTileEntity(linkedRings)) : null);
+		return (linkedRings != null && world.getTileEntity(linkedRings) instanceof TransportRingsTile ? ((TransportRingsTile) world.getTileEntity(linkedRings)) : null);
 	}
 	
 	@Override

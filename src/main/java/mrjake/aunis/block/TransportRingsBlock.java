@@ -78,11 +78,11 @@ private static final String blockName = "transportrings_block";
 	@Override
 	public void breakBlock(World world, BlockPos pos, IBlockState state) {
 		TransportRingsTile ringsTile = (TransportRingsTile) world.getTileEntity(pos);
+                if (ringsTile.isLinked()) {
+                	ringsTile.getLinkedControllerTile(world).setLinkedRings(null);
+                }
                 RingMap.removeOldAddress(ringsTile, ringsTile.getAddress());
-                if (ringsTile.isLinked())
-			ringsTile.getLinkedControllerTile(world).setLinkedRings(null);
 		
-		ringsTile.removeAllRings();
 	}
         
 	@Override
