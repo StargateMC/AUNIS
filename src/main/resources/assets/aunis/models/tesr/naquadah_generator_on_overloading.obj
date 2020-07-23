@@ -1,7 +1,7 @@
 # Blender v2.83.2 OBJ File: ''
 # www.blender.org
-mtllib naquadah_generator_on.mtl
-o naquadah_generator_on
+mtllib naquadah_generator_on_overloading.mtl
+o naquadah_generator_on_overloading
 v 0.766300 0.160200 0.576300
 v 0.227900 0.160200 0.576300
 v 0.227900 0.160200 0.560500
@@ -4077,7 +4077,7 @@ f 579/1132/569 583/1131/568 497/641/430
 f 499/643/432 579/1132/569 497/641/430
 f 478/620/411 579/1132/569 499/643/432
 f 479/621/412 478/620/411 499/643/432
-o naquadah_generator_on
+o naquadah_generator_off_naquadah_generator_off.001
 v 0.766300 0.160200 0.576300
 v 0.227900 0.160200 0.576300
 v 0.227900 0.160200 0.560500
