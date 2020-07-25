@@ -80,7 +80,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
     private int powerTier = 6;
     private double energyBuffer = 0;
     private int update = 0;
-    private double energyMax = 10000000;
+    private double energyMax = 1000000;
 	
 	public static final int FADE_OUT_TOTAL_TIME = 2 * 120; // 2s
 	public static final int TIMEOUT_TELEPORT = FADE_OUT_TOTAL_TIME/2;
