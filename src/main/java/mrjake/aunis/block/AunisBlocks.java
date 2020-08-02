@@ -14,6 +14,7 @@ import mrjake.aunis.item.CapacitorItemBlock;
 import mrjake.aunis.item.StargateMilkyWayMemberItemBlock;
 import mrjake.aunis.item.StargateUniverseMemberItemBlock;
 import mrjake.aunis.stargate.EnumMemberVariant;
+import mrjake.aunis.tileentity.AsgardTransportTile;
 import mrjake.aunis.tileentity.BeamerTile;
 import mrjake.aunis.tileentity.CapacitorTile;
 import mrjake.aunis.tileentity.DHDTile;
@@ -54,6 +55,7 @@ public class AunisBlocks {
 //	public static final DHDBlock DHD_BLOCK = new DHDBlock();
 	
 	public static final TransportRingsBlock TRANSPORT_RINGS_BLOCK = new TransportRingsBlock();
+	public static final AsgardTransportBlock ASGARD_TRANSPORT_BLOCK = new AsgardTransportBlock();
 	public static final TRControllerBlock TR_CONTROLLER_BLOCK = new TRControllerBlock();
 	public static final InvisibleBlock INVISIBLE_BLOCK = new InvisibleBlock();	
 		
@@ -77,7 +79,7 @@ public class AunisBlocks {
 //		STARGATE_ORLIN_MEMBER_BLOCK,
 		
 //		DHD_BLOCK,
-		
+		ASGARD_TRANSPORT_BLOCK,
 		TRANSPORT_RINGS_BLOCK,
 		TR_CONTROLLER_BLOCK,
 		INVISIBLE_BLOCK,
@@ -105,6 +107,7 @@ public class AunisBlocks {
 //		GameRegistry.registerTileEntity(DHDTile.class, AunisBlocks.DHD_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(TransportRingsTile.class, AunisBlocks.TRANSPORT_RINGS_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(TRControllerTile.class, AunisBlocks.TR_CONTROLLER_BLOCK.getRegistryName());
+		GameRegistry.registerTileEntity(AsgardTransportTile.class, AunisBlocks.ASGARD_TRANSPORT_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(CapacitorTile.class, AunisBlocks.CAPACITOR_BLOCK.getRegistryName());
 		GameRegistry.registerTileEntity(BeamerTile.class, AunisBlocks.BEAMER_BLOCK.getRegistryName());
 	}
