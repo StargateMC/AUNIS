@@ -66,35 +66,61 @@ import ic2.api.energy.tile.IEnergySink;
 @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers")
 public class AsgardTransportTile extends TileEntity implements IEnergySink, ITickable, RendererProviderInterface, StateProviderInterface, ScheduledTaskExecutorInterface, ILinkable, Environment{
 
-	@Override
-	public boolean acceptsEnergyFrom(IEnergyEmitter arg0, EnumFacing arg1) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
+	 private boolean loaded = false;
+	    private int maxSafeInput = 32768;
+	    private int powerTier = 6;
+	    private double energyBuffer = 0;
+	    private int update = 0;
+	    private double energyMax = 1000000;
 
+	
+	private Node node = Aunis.ocWrapper.createNode(this, "Asgard Transporter");
 	@Override
+	@Optional.Method(modid = "opencomputers")
 	public Node node() {
-		// TODO Auto-generated method stub
-		return null;
+		return node;
+	}
+	
+	void unload() {
+        if (!world.isRemote && loaded) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            loaded = false;
+        }
+    }
+	
+	@Override
+	public void onChunkUnload() {
+		if (node != null)
+			node.remove();
+		
+		unload();
 	}
 
 	@Override
-	public void onConnect(Node arg0) {
-		// TODO Auto-generated method stub
-		
+	public void invalidate() {
+		if (node != null)
+			node.remove();
+		unload();
+		super.invalidate();
 	}
 
 	@Override
-	public void onDisconnect(Node arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	@Optional.Method(modid = "opencomputers")
+	public void onConnect(Node node) {}
 
 	@Override
-	public void onMessage(Message arg0) {
-		// TODO Auto-generated method stub
-		
+	@Optional.Method(modid = "opencomputers")
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public void onMessage(Message message) {}
+	
+	public void sendSignal(Object context, String name, Object... params) {
+		Aunis.ocWrapper.sendSignalToReachable(node, (Context) context, name, params);
 	}
+
 
 	@Override
 	public boolean canLinkTo() {
@@ -143,22 +169,38 @@ public class AsgardTransportTile extends TileEntity implements IEnergySink, ITic
 		// TODO Auto-generated method stub
 		
 	}
+	
+	//------------------------- IEnergyAcceptor -------------------------
 
-	@Override
-	public double getDemandedEnergy() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public boolean acceptsEnergyFrom(IEnergyEmitter emitter, EnumFacing direction) {
+    	if (!direction.equals(EnumFacing.UP)) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
 
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    //------------------------- IEnergySink -------------------------
 
-	@Override
-	public double injectEnergy(EnumFacing arg0, double arg1, double arg2) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public double getDemandedEnergy() {
+        double eu = Math.min(energyMax - energyBuffer, maxSafeInput);
+        return eu;
+    }
+
+    @Override
+    public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
+        energyBuffer += amount;
+        if (update++ > 10) { // We dont' need 20 packets per second to the client....
+            markDirty();
+            update = 0;
+        }
+        return 0;
+    }
+
+    @Override
+    public int getSinkTier() {
+        return powerTier;  //HV
+    }
 }
