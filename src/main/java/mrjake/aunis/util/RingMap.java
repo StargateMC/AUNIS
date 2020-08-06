@@ -52,6 +52,26 @@ public class RingMap extends WorldSavedData {
         super(name);
     }
     
+    public static int getNumberOfRingNets() {
+    	return RingMap.get().getNumberOfRingNetworks();
+    }
+
+    public static int getNumberOfRingPlatforms() {
+    	return RingMap.get().getNumberOfRings();
+    }
+    
+    public int getNumberOfRingNetworks() {
+    	return addressToEntries.keySet().size();
+    }
+    
+    public int getNumberOfRings() {
+    	int count = 0;
+    	for (String ring : addressToEntries) {
+    		count += (addressToEntries.get(ring).size());
+    	}
+    	return count;
+    }
+    
     public static RingMap get() {
         World world = BaseUtils.getWorldForDimension(0);
         return BaseUtils.getWorldData(world, RingMap.class, "stargatemc-ring_map");
