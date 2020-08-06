@@ -160,7 +160,7 @@ public class RingMap extends WorldSavedData {
     }
     public void updateRings(String address, int frequency) {
         if (this.getRingsForFrequencyInstanced(address, frequency) == null || this.getRingsForFrequencyInstanced(address, frequency).isEmpty()) return;
-        int count = 0;
+        int count = 1;
 		try {
                     for (RingAddressEntry rae : this.getRingsForFrequencyInstanced(address, frequency)) {
                                 TransportRingsTile trt = rae.getRings();

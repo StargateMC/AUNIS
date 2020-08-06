@@ -320,7 +320,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 		TransportRings rings = null;
                 
                 try {
-                    rings = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address).getRings().getRings();
+                    rings = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings().getRings();
                 } catch (Exception e) {
                     return TransportResult.NO_SUCH_ADDRESS;
                 }
@@ -328,7 +328,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 		// Binding exists
 		if (rings != null) {
 			BlockPos targetRingsPos = rings.getPos();
-			TransportRingsTile targetRingsTile = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address).getRings();
+			TransportRingsTile targetRingsTile = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings();
                         
 			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency()) {
 				return TransportResult.NO_SUCH_ADDRESS;
