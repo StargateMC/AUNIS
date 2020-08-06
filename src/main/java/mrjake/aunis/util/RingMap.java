@@ -66,7 +66,7 @@ public class RingMap extends WorldSavedData {
     
     public int getNumberOfRings() {
     	int count = 0;
-    	for (String ring : addressToEntries) {
+    	for (String ring : addressToEntries.keySet()) {
     		count += (addressToEntries.get(ring).size());
     	}
     	return count;
