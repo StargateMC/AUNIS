@@ -80,7 +80,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
     private int powerTier = 6;
     private double energyBuffer = 0;
     private int update = 0;
-    private double energyMax = 1000000;
+    private double energyMax = 10000000;
 	
 	public static final int FADE_OUT_TOTAL_TIME = 2 * 120; // 2s
 	public static final int TIMEOUT_TELEPORT = FADE_OUT_TOTAL_TIME/2;
@@ -300,12 +300,19 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 	 * 
 	 * @param address Target rings address
 	 */
+	
+	public void setBufferRandom() {
+		Random r = new Random();
+	    energyBuffer = r.nextInt(energyMax);
+		markDirty();
+	}
+	
 	public TransportResult attemptTransportTo(int address, int waitTime) {
                 
                 if (this.getAddress() == null || this.frequency == -1)
                     return TransportResult.NOT_LINKED;
         
-        if (this.energyBuffer < energyMax) {
+        if (this.energyBuffer < 100000) {
         	return TransportResult.INSUFFICIENT_POWER;
         }
         
@@ -350,7 +357,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 			targetRingsTile.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
-			this.energyBuffer = 0;
+			this.energyBuffer -= 100000;
 			markDirty();
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
 			this.targetDimension = targetRingsTile.world.provider.getDimension();
