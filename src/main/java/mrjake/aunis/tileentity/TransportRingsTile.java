@@ -305,7 +305,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 	
 	public void setBufferRandom() {
 		Random r = new Random();
-	    energyBuffer = r.nextInt(energyMax);
+	    energyBuffer = r.nextInt((int)energyMax);
 		markDirty();
 	}
 	
@@ -314,7 +314,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
                 if (this.getAddress() == null || this.frequency == -1)
                     return TransportResult.NOT_LINKED;
         
-        if (this.energyBuffer < 100000) {
+        if (this.energyBuffer < 1000000) {
         	return TransportResult.INSUFFICIENT_POWER;
         }
         
@@ -359,7 +359,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 			targetRingsTile.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
-			this.energyBuffer -= 100000;
+			this.energyBuffer -= 1000000;
 			markDirty();
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
 			this.targetDimension = targetRingsTile.world.provider.getDimension();
