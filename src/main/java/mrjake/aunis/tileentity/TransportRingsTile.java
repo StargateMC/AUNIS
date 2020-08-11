@@ -335,34 +335,33 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
                 }
                 		
 		// Binding exists
-		if (rings != null) {
+		if (rings != null && rings instanceof TransportRingsTile) {
+			System.out.println("Activating rings: " + this.getPos().toString() + " on dimension : " + this.world.provider.getDimension() + " and connecting to : " + rings.getPos().toString() + " on dimension : " + rings.getWorld().provider.getDimension());
 			BlockPos targetRingsPos = rings.getPos();
-			TransportRingsTile targetRingsTile = RingMap.getRingsForFrequency(this.getAddress(), this.getFrequency()).get(address-1).getRings();
-                        
-			if (targetRingsTile.getAddress() == null || targetRingsTile.frequency != this.getFrequency()) {
+			if (rings.getAddress() == null || rings.frequency != this.getFrequency()) {
 				return TransportResult.NO_SUCH_ADDRESS;
 			}
                         
-			if (targetRingsTile.checkIfObstructed()) {
+			if (rings.checkIfObstructed()) {
 				return TransportResult.OBSTRUCTED_TARGET;
 			}
 			
-			if (targetRingsTile.isBusy()) {
+			if (rings.isBusy()) {
 				return TransportResult.BUSY_TARGET;
 			}
 			
-                        if (targetRingsTile.equals(this)) {
+                        if (rings.equals(this)) {
                             return TransportResult.DIAL_SELF_FAIL;
                         }
                         
 			this.setBusy(true);
-			targetRingsTile.setBusy(true);
+			rings.setBusy(true);
 			
 			List<Entity> excludedFromReceivingSite = world.getEntitiesWithinAABB(Entity.class, globalTeleportBox);
 			this.energyBuffer -= 1000000;
 			markDirty();
 			List<Entity> excludedEntities = targetRingsTile.startAnimationAndTeleport(pos, excludedFromReceivingSite, waitTime, false);
-			this.targetDimension = targetRingsTile.world.provider.getDimension();
+			this.targetDimension = rings.world.provider.getDimension();
                         startAnimationAndTeleport(targetRingsPos, excludedEntities, waitTime, true);
 			
 			return TransportResult.OK;
