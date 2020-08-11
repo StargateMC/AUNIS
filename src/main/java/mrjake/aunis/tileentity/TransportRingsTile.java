@@ -455,6 +455,10 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 	// ---------------------------------------------------------------------------------
 	// Rings network
 	private TransportRings rings;
+	
+	public void clearRings() {
+		this.rings = null;
+	}
 	public TransportRings getRings() {
 		if (rings == null)
 			rings = new TransportRings(getPos(),world.provider.getDimension());
