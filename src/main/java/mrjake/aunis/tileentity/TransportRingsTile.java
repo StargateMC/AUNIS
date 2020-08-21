@@ -826,7 +826,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 		
 		int freq = args.checkInteger(0);
 		
-		if (this.getFrequency() < 1)
+		if (freq < 1)
 			throw new IllegalArgumentException("bad argument #1 (frequency out of range, allowed <0+>)");
 		RingAddressEntry entry = RingMap.getForTileEntity(this);
                 if (RingMap.availableSlots(this.getAddress(), freq) < 1)
