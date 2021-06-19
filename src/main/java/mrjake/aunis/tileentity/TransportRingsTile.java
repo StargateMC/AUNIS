@@ -314,7 +314,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
                 if (this.getAddress() == null || this.frequency == -1)
                     return TransportResult.NOT_LINKED;
         
-        if (this.energyBuffer < 1000000) {
+        if (!com.stargatemc.data.LocationData.isPositionProtected(this.world, this.getPos()) && this.energyBuffer < 1000000) {
         	return TransportResult.INSUFFICIENT_POWER;
         }
         
