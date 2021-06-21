@@ -12,11 +12,12 @@ import net.minecraftforge.fml.relauncher.Side;
 
 @EventBusSubscriber(Side.CLIENT)
 public class PlayerFadeOutRenderEvent {
-
+	
+	private static World world;
 	private static long tickStart;
 	private static boolean fadeOut;
 	
-	public static double calcFog(long tickStart, double partialTicks) {
+	public static double calcFog(World world, long tickStart, double partialTicks) {
 		double effTick = System.currentTimeMillis() - tickStart + partialTicks;
 				
 		return -(effTick * (effTick-TransportRingsTile.FADE_OUT_TOTAL_TIME)) / (20*20);
@@ -25,7 +26,7 @@ public class PlayerFadeOutRenderEvent {
 	@SubscribeEvent
 	public static void onDrawGui(RenderGameOverlayEvent.Post event) {		
 		if (fadeOut) {
-			float fog = (float) calcFog( tickStart, event.getPartialTicks());
+			float fog = (float) calcFog(world, tickStart, event.getPartialTicks());
 			
 			if (fog < 0) {
 				fadeOut = false;
@@ -74,7 +75,8 @@ public class PlayerFadeOutRenderEvent {
 	} */
 
 	public static void startFadeOut() {
-		tickStart = System.currentTimeMillis();
+		world = Minecraft.getMinecraft().world;
+		tickStart = world.getTotalWorldTime();
 		
 		fadeOut = true;
 	}

@@ -220,6 +220,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 						BlockPos ePos = entity.getPosition().add(teleportVector);	
                                                 if (targetDimension != this.world.provider.getDimension()) {
                                                     if (entity instanceof EntityPlayer) {
+                                                        CoreAPI.logAudit(CoreAPI.getLocationString((EntityPlayer)entity) + " is being teleported by rings from : " + this.getPos().toString() + " on : " + this.world.provider.getDimension() + " to : " + targetDimension + " at : " + ePos.toString(), false);
                                                         CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
                                                     } else {
                                                         FakeTeleporter fakeTeleporter = new FakeTeleporter();
