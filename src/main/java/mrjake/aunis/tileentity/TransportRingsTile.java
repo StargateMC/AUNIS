@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
+import com.stargatemc.data.PerWorldData;
+import noppes.npcs.controllers.FactionController;
 import ic2.api.energy.tile.IEnergyEmitter;
 import ic2.api.energy.EnergyNet;
 import ic2.api.energy.event.EnergyTileLoadEvent;
@@ -220,6 +221,10 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 						boolean transported = false;
 						BlockPos ePos = entity.getPosition().add(teleportVector);	
                                                 if (targetDimension != this.world.provider.getDimension()) {
+    												if (targetDimension == 0) {
+    													CoreAPI.logAudit("Refusing to transport anything to DIM0!");
+    													continue;
+    												}
                                                     if (entity instanceof EntityPlayer) {
                                                     		if (FactionController.instance.getFactionFromName("Ascended").isFriendlyToPlayer((EntityPlayer)entity) || !PerWorldData.isCreative(targetDimension)) {
                                                                 CoreAPI.logAudit(CoreAPI.getLocationString((EntityPlayer)entity) + " is being teleported by rings from : " + this.getPos().toString() + " on : " + this.world.provider.getDimension() + " to : " + targetDimension + " at : " + ePos.toString(), false);
