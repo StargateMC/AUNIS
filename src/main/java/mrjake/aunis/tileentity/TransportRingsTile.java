@@ -215,20 +215,32 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 				BlockPos teleportVector = targetRingsPos.subtract(pos);
 				
 				for (Entity entity : teleportList) {
-                                        if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
+                    if (entity instanceof EntityCustomNpc && ((EntityCustomNpc)entity).stats.spawnCycle != 3 && ((EntityCustomNpc)entity).stats.spawnCycle != 4)continue;
 					if (!excludedEntities.contains(entity)) {
+						boolean transported = false;
 						BlockPos ePos = entity.getPosition().add(teleportVector);	
                                                 if (targetDimension != this.world.provider.getDimension()) {
                                                     if (entity instanceof EntityPlayer) {
-                                                        CoreAPI.logAudit(CoreAPI.getLocationString((EntityPlayer)entity) + " is being teleported by rings from : " + this.getPos().toString() + " on : " + this.world.provider.getDimension() + " to : " + targetDimension + " at : " + ePos.toString(), false);
-                                                        CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
+                                                    		if (FactionController.instance.getFactionFromName("Ascended").isFriendlyToPlayer((EntityPlayer)entity) || !PerWorldData.isCreative(targetDimension)) {
+                                                                CoreAPI.logAudit(CoreAPI.getLocationString((EntityPlayer)entity) + " is being teleported by rings from : " + this.getPos().toString() + " on : " + this.world.provider.getDimension() + " to : " + targetDimension + " at : " + ePos.toString(), false);
+                                                                CoreAPI.teleporter((EntityPlayer)entity, targetDimension, ePos);
+                                                                transported = true;
+                                                    		} else {
+                                                    			CoreAPI.sendMessage((EntityPlayer)entity, "A higher power prevents you travelling to the destination without being friendly with the Ascended...", true);
+                                                    			continue;
+                                                    		}
                                                     } else {
-                                                        FakeTeleporter fakeTeleporter = new FakeTeleporter();
-                                                        entity = entity.changeDimension(targetDimension, fakeTeleporter);
+                                                    	if (!PerWorldData.isCreative(targetDimension)) {
+                                                    		FakeTeleporter fakeTeleporter = new FakeTeleporter();
+                                                        	entity = entity.changeDimension(targetDimension, fakeTeleporter);
+                                                            transported = true;
+                                                    	}
                                                     }
+                                                } else {
+                                                	transported = true;
                                                 }
                                                 
-						entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
+						if (transported) entity.setPositionAndUpdate(ePos.getX(), ePos.getY(), ePos.getZ());
 					}
 				}
 				
