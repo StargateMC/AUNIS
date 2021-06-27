@@ -222,7 +222,7 @@ public class TransportRingsTile extends TileEntity implements IEnergySink, ITick
 						BlockPos ePos = entity.getPosition().add(teleportVector);	
                                                 if (targetDimension != this.world.provider.getDimension()) {
     												if (targetDimension == 0) {
-    													CoreAPI.logAudit("Refusing to transport anything to DIM0!");
+    													CoreAPI.logAudit("Refusing to transport anything to DIM0!", false);
     													continue;
     												}
                                                     if (entity instanceof EntityPlayer) {
